@@ -9,13 +9,6 @@ using namespace cdtags;
 namespace fs = boost::filesystem;
 
 int
-doActivate(int argc, const char** argv)
-{
-
-  return 0;
-}
-
-int
 main(int argc, const char** argv)
 {
 
