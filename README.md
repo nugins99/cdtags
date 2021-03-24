@@ -14,7 +14,7 @@ and this is typed a lot.  Wouldn't it be faster to do:
 
 You can probably use $CDPATH to do most of this, or aliases. 
 
-This was heavily inspired by [dtags |https://github.com/joowani/dtags].
+This was heavily inspired by [dtags](https://github.com/joowani/dtags).
 
 ## Why:
 
