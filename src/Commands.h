@@ -2,6 +2,7 @@
 #define CDTAGS_COMMANDS_H
 
 #include "Debug.h"
+#include "Version.h"
 #include <boost/program_options.hpp>
 #include <functional>
 #include <iostream>
@@ -60,6 +61,7 @@ public:
             global.add_options()
                     ("help", "Print this help message")
                     ("verbose", "Generate debug output")
+                    ("version", "Print version and return")
                     ("command", po::value<std::string>(), "Command")
                     ("subargs", po::value<std::vector<std::string>>(), "Subarg commands");
 
@@ -83,6 +85,12 @@ public:
             if (vm.count("command"))
             {
                 cmd = vm["command"].as<std::string>();
+            }
+
+            if (vm.count("version"))
+            {
+                std::cout << "Version: "<< cdtags::version << std::endl;
+                return 0;
             }
 
             if (vm.count("help"))
