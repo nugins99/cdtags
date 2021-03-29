@@ -47,5 +47,8 @@ copy build-boost.sh /build
 RUN chmod +x /build/build-boost.sh
 RUN  /usr/bin/scl enable devtoolset-8 /build/build-boost.sh
 
+copy cmake-3.20.0-linux-x86_64.tar.gz /build/cmake-3.20.0-linux-x86_64.tar.gz
+RUN tar -C /build  -xzvf /build/cmake-3.20.0-linux-x86_64.tar.gz
+
 CMD ["/usr/sbin/sshd", "-D", "-e", "-f", "/etc/ssh/sshd_config_test_clion"]
 #CMD ["/bin/bash"]

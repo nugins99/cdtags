@@ -1,9 +1,12 @@
-build: boost_1_75_0.tar.gz
+build: boost_1_75_0.tar.gz cmake-3.20.0-linux-x86_64.tar.gz
 	cp ~/.ssh/id_rsa.pub . 
 	docker build --network host -t centos6-build .
 
 boost_1_75_0.tar.gz: 
 	wget https://dl.bintray.com/boostorg/release/1.75.0/source/boost_1_75_0.tar.gz
+
+cmake-3.20.0-linux-x86_64.tar.gz:
+	wget https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0-linux-x86_64.tar.gz
 
 run:
 	docker run --hostname centos6-build  -d --cap-add sys_ptrace\
