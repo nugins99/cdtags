@@ -1,7 +1,20 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0..3.20)
 project(cdtags)
+
+SET(CPACK_PACKAGE_VERSION_MAJOR "1")
+SET(CPACK_PACKAGE_VERSION_MINOR "0")
+SET(CPACK_PACKAGE_VERSION_PATCH "1")
 
 set(Boost_USE_STATIC_LIBS ON)
 set(CMAKE_CXX_STANDARD 11)
 find_package(Boost REQUIRED COMPONENTS filesystem program_options )
 add_subdirectory(src)
+
+set(CPACK_SOURCE_GENERATOR "TGZ")
+set(CPACK_SOURCE_IGNORE_FILES
+  \\.git/
+  build/
+  ".*~$"
+)
+set(CPACK_VERBATIM_VARIABLES YES)
+include(CPack)
