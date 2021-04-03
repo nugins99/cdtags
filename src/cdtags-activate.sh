@@ -23,5 +23,5 @@ _cdt() {
 }
 
 complete -o dirnames -F _cdtags cdtags
-complete -o dirnames -F _cdt cdt
+complete -o dirnames -o nospace -F _cdt cdt
 
