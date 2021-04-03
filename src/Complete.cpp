@@ -146,11 +146,12 @@ cdtags::Complete::process(const std::vector<std::string>& args)
   auto first = currPath.begin()->string();
 
   if (std::distance(currPath.begin(), currPath.end()) == 1) {
-    //  Input is just "something"
+    //  Input is something like "Movies"
+    // - just a string, no path separator.
     complete_tags(curr, cfg);
     complete_relative_path(currPath);
   } else {
-    //  Input is "something/a/"
+    //  Input is something lke "Movies/IronMan"
     //  or "something/a/b/"
     complete_tags(curr, cfg);
     complete_relative_path(currPath);
