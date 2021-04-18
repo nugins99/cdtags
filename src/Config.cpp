@@ -64,10 +64,10 @@ saveConfig(const Config& m)
   }
 
   std::ofstream out(configFile().c_str());
-  for (auto path : m.aliases) {
+  for (const auto& path : m.aliases) {
     DEBUG("Path: " << path.first);
     out << path.first.string() << ",";
-    for (auto p : path.second) {
+    for (const auto& p : path.second) {
       DEBUG(p);
       out << p << ",";
     }
