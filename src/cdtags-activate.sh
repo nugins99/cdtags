@@ -1,6 +1,6 @@
-function cdt 
+function d
 {
-    cd $(cdtags cd $1)
+    cd "$(cdtags cd $1)"
 }
 
 _cdtags() {
@@ -23,5 +23,5 @@ _cdt() {
 }
 
 complete -o dirnames -F _cdtags cdtags
-complete -o dirnames -o nospace -F _cdt cdt
+complete -o dirnames -o nospace -F _cdt d
 
