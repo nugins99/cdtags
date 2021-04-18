@@ -28,7 +28,7 @@ complete_abs_dir(const fs::path& curr,
 
     if (fs::path(curr).filename_is_dot() || (curr == "/")) {
       DEBUG(curr << ": filename is dot");
-      for (auto d : list_subdirs(curr)) {
+      for (const auto& d : list_subdirs(curr)) {
         DEBUG(d << ": " << prefix);
         if (prefix.empty()) {
           std::cout << d.string() << std::endl;
@@ -48,14 +48,13 @@ complete_abs_dir(const fs::path& curr,
     }
   } else {
 
-    std::vector<fs::path> matches;
     auto parent = fs::path(curr).parent_path();
     auto leaf = fs::path(curr).leaf().string();
     if (!fs::is_directory(parent)) {
       return;
     }
 
-    for (auto d : list_subdirs(parent)) {
+    for (const auto& d : list_subdirs(parent)) {
       if (d.leaf().string().find(leaf) == 0) {
         std::cout << d.string() << std::endl;
       }
@@ -66,7 +65,7 @@ complete_abs_dir(const fs::path& curr,
 int
 complete_tags(const std::string& curr, const Config& cfg)
 {
-  for (auto v : cfg.paths) {
+  for (const auto& v : cfg.paths) {
     if (v.first.find(curr) == 0) {
       DEBUG("Tag completer: " << curr << " : " << v.first);
       std::cout << v.first << std::endl;
@@ -143,7 +142,6 @@ cdtags::Complete::process(const std::vector<std::string>& args)
 
   // Is first element of path a tag?
   auto currPath = fs::path(curr);
-  auto first = currPath.begin()->string();
 
   if (std::distance(currPath.begin(), currPath.end()) == 1) {
     //  Input is something like "Movies"

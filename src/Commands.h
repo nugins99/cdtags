@@ -11,12 +11,6 @@
 
 namespace cdtags {
 
-struct Options
-{
-  std::string command;
-  // sub options
-};
-
 namespace po = boost::program_options;
 
 class CommandHandler
@@ -29,12 +23,11 @@ public:
 class CommandParser
 {
 public:
-  typedef std::vector<std::string> Args;
 
-  CommandParser() {}
+  CommandParser() = default;
 
   void doHelp(std::ostream& out,
-              po::options_description& opt,
+              const po::options_description& opt,
               const std::string& cmd)
   {
     // Print global options.
@@ -43,7 +36,7 @@ public:
     auto subCmd = subCommands.find(cmd);
     if (subCmd == subCommands.end()) {
       out << "Available commands:" << std::endl;
-      for (auto c : commands) {
+      for (const auto & c : commands) {
         out << "\t" << c << std::endl;
       }
     } else {

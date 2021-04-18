@@ -8,7 +8,7 @@ int
 ChangeDirectory::process(const std::vector<std::string>& args)
 {
   auto cfg = parseConfig();
-  if (args.size() >= 1) {
+  if (!args.empty()) {
     // Reverting to previous directory.
     if (args[0] == "-") {
       DEBUG("Returning to old PWD");
