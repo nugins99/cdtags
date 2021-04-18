@@ -1,0 +1,8 @@
+#ifndef CDTAGS_VERSION_H
+#define CDTAGS_VERSION_h
+
+namespace cdtags {
+constexpr const char* version = "@CPACK_PACKAGE_VERSION_MAJOR@.@CPACK_PACKAGE_VERSION_MINOR@.@CPACK_PACKAGE_VERSION_PATCH@";
+}
+
+#endif // CDTAGS_VERSION_H

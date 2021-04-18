@@ -1,9 +1,13 @@
 cmake_minimum_required(VERSION 3.0..3.20)
 project(cdtags)
 SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Set the package version.
+# This applies to both the RPM package and # a "configure_file" command to replace values in
+# src/Version.h.in"
 SET(CPACK_PACKAGE_VERSION_MAJOR "1")
-SET(CPACK_PACKAGE_VERSION_MINOR "0")
-SET(CPACK_PACKAGE_VERSION_PATCH "1")
+SET(CPACK_PACKAGE_VERSION_MINOR "1")
+SET(CPACK_PACKAGE_VERSION_PATCH "0")
 
 set(Boost_USE_STATIC_LIBS ON)
 set(CMAKE_CXX_STANDARD 11)
