@@ -1,8 +1,7 @@
 pipeline {
   agent { 
     dockerfile {
-        filename "docker/centos8/Dockerfile"
-        label "centos8-build"
+        filename 'docker/centos8/Dockerfile'
     }
   }
 
@@ -10,11 +9,11 @@ pipeline {
     stage('Build') {
       steps {
         sh '''
-           mkdir build
-           cd build 
-           cmake -DCMAKE_BUILD_TYPE=Release ..
-           make
-           make package
+           mkdir build ;
+           cd build ;
+           cmake -DCMAKE_BUILD_TYPE=Release .. ;
+           make ; 
+           make package ;
            '''
       }
     }
