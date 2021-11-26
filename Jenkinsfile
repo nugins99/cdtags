@@ -1,10 +1,10 @@
 pipeline {
-  agent { 
+  agent {
     dockerfile {
         filename 'docker/centos8/Dockerfile'
     }
-  }
 
+  }
   stages {
     stage('Build') {
       steps {
@@ -17,5 +17,6 @@ pipeline {
            '''
       }
     }
+
   }
 }
