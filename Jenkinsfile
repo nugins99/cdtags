@@ -1,16 +1,22 @@
 pipeline {
-  agent {
-    docker {
-      image 'centos:8'
+  agent { 
+    dockerfile {
+        filename "docker/centos8/Dockerfile"
+        label "centos8-build"
     }
-
   }
+
   stages {
-    stage('error') {
+    stage('Build') {
       steps {
-        sh 'yum install -y cmake gcc'
+        sh '''
+           mkdir build
+           cd build 
+           cmake -DCMAKE_BUILD_TYPE=Release ..
+           make
+           make package
+           '''
       }
     }
-
   }
 }
