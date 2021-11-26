@@ -1,12 +1,12 @@
 pipeline {
   agent {
     docker {
-      image 'centos8:latest'
+      image 'centos:8'
     }
 
   }
   stages {
-    stage('') {
+    stage('error') {
       steps {
         sh 'yum install -y cmake gcc'
       }
