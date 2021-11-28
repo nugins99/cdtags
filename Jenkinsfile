@@ -29,7 +29,7 @@ pipeline {
                 sh '''
                    mkdir build ;
                    cd build ;
-                   cmake -DSTATIC=1 -DCMAKE_BUILD_TYPE=Release .. ;
+                   /opt/cmake/cmake-3.22.0-linux-x86_64/bincmake -DSTATIC=1 -DCMAKE_BUILD_TYPE=Release .. ;
                    make ; 
                    make package ;
                    '''
