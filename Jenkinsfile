@@ -21,7 +21,8 @@ pipeline {
         stage('CentOS6') {
             agent {
                     dockerfile {
-                        filename 'docker/centos6/Dockerfile'
+                        dir 'docker/centos6'
+                        filename 'Dockerfile'
                     }
             }
             steps {
