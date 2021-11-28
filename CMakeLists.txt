@@ -9,7 +9,10 @@ SET(CPACK_PACKAGE_VERSION_MAJOR "1")
 SET(CPACK_PACKAGE_VERSION_MINOR "1")
 SET(CPACK_PACKAGE_VERSION_PATCH "1")
 
-#set(Boost_USE_STATIC_LIBS ON)
+
+if (STATIC)
+    set(Boost_USE_STATIC_LIBS ON)
+endif()
 set(CMAKE_CXX_STANDARD 11)
 find_package(Boost REQUIRED COMPONENTS filesystem program_options )
 add_subdirectory(src)

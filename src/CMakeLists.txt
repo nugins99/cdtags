@@ -1,4 +1,7 @@
-#set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++")
+if (STATIC)
+    set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++")
+endif()
+
 configure_file("Version.h.in" "Version.h")
 add_executable(cdtags
         main.cpp
