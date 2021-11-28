@@ -11,6 +11,7 @@ pipeline {
             }
             steps {
                 sh '''
+                   echo "$USER:$UID"
                    mkdir build ;
                    cd build ;
                    conan install .. --build='*'
@@ -29,6 +30,7 @@ pipeline {
             }
             steps {
                 sh '''
+                   echo "$USER:$UID"
                    mkdir build ;
                    cd build ;
                    export BOOST_DIR=/opt/boost
