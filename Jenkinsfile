@@ -5,7 +5,8 @@ pipeline {
         stage('CentOS8') {
             agent {
                     dockerfile {
-                        filename 'docker/centos8/Dockerfile'
+                        dir 'docker/centos8'
+                        filename 'Dockerfile'
                     }
             }
             steps {
