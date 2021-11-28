@@ -13,6 +13,7 @@ pipeline {
                 sh '''
                    mkdir build ;
                    cd build ;
+                   conan install .. --build='*'
                    cmake -DCMAKE_BUILD_TYPE=Release .. ;
                    make -j4; 
                    make package ;
@@ -31,9 +32,10 @@ pipeline {
                    mkdir build ;
                    cd build ;
                    export BOOST_DIR=/opt/boost
-                   /usr/bin/scl enable devtoolset-8 '/build/cmake-3.22.0-linux-x86_64/bin/cmake -DSTATIC=1 -DCMAKE_BUILD_TYPE=Release ..' ;
-                   /usr/bin/scl enable devtoolset-8 'make -j4'; 
-                   /usr/bin/scl enable devtoolset-8 'make package';
+                   /usr/bin/scl enable rh-python36 devtoolset-8 'conan install .. --build=\'*\'''
+                   /usr/bin/scl enable rh-python36 devtoolset-8 '/build/cmake-3.22.0-linux-x86_64/bin/cmake -DSTATIC=1 -DCMAKE_BUILD_TYPE=Release ..' ;
+                   /usr/bin/scl enable rh-python36 devtoolset-8 'make VERBOSE=1'; 
+                   /usr/bin/scl enable rh-python36 devtoolset-8 'make package';
                    '''
             }
         }
