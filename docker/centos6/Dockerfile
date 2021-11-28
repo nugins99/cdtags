@@ -18,6 +18,7 @@ COPY devenv.sh /etc/profile.d/devenv.sh
 RUN wget https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0-linux-x86_64.tar.gz
 RUN cp cmake-3.22.0-linux-x86_64.tar.gz /build/cmake-3.20.0-linux-x86_64.tar.gz
 RUN tar -C /build  -xzvf /build/cmake-3.20.0-linux-x86_64.tar.gz
+RUN mkdir /.conan
 
 # Build boost
 #RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.75.0/source/boost_1_75_0.tar.gz
