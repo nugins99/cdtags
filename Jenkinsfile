@@ -29,9 +29,10 @@ pipeline {
                 sh '''
                    mkdir build ;
                    cd build ;
-                   /build/cmake-3.22.0-linux-x86_64/bin/cmake -DSTATIC=1 -DCMAKE_BUILD_TYPE=Release .. ;
-                   make ; 
-                   make package ;
+                   export BOOST_DIR=/opt/boost
+                   /usr/bin/scl enable devtoolset-8 /build/cmake-3.22.0-linux-x86_64/bin/cmake -DSTATIC=1 -DCMAKE_BUILD_TYPE=Release .. ;
+                   /usr/bin/scl enable devtoolset-8 make ; 
+                   /usr/bin/scl enable devtoolset-8 make package ;
                    '''
             }
         }
