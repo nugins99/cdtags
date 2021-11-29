@@ -5,4 +5,4 @@ boost/1.77.0
 cmake
 
 [options]
-boost:pch=false
+boost:pch=False
