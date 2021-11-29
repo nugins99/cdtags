@@ -14,7 +14,9 @@ pipeline {
                    echo "$USER:$UID"
                    mkdir build ;
                    cd build ;
-                   conan install .. --build='*'
+                   conan remote add local http://conan:9300 ;
+                   conan user -p jenkins  -r local jenkins ;
+                   conan install .. ;
                    cmake -DCMAKE_BUILD_TYPE=Release .. ;
                    make -j4; 
                    make package ;
