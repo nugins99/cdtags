@@ -17,7 +17,7 @@ pipeline {
                    cd build ;
                    conan install .. --build=missing ;
                    cmake -DCMAKE_BUILD_TYPE=Release .. ;
-                   make -j4; 
+                   make -j2 VERBOSE=1; 
                    make package ;
                    '''
             }
