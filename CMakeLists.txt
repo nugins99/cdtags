@@ -14,7 +14,7 @@ SET(CPACK_PACKAGE_VERSION_MINOR "1")
 SET(CPACK_PACKAGE_VERSION_PATCH "1")
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD 17)
 endif()
 
 # Boost
@@ -24,7 +24,8 @@ endif()
 set(Boost_INSTALL_DIR ${CONAN_BOOST_ROOT})
 set(Boost_DEBUG ON)
 message(STATUS "BOOST DIR: ${Boost_INSTALL_DIR}")
-find_package(Boost 1.77.0 REQUIRED COMPONENTS filesystem program_options)
+#find_package(Boost 1.77.0 REQUIRED COMPONENTS filesystem program_options)
+find_package(Boost 1.77.0 REQUIRED COMPONENTS program_options)
 
 # Source Dirs
 add_subdirectory(src)

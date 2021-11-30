@@ -2,7 +2,8 @@
 #define CDTAGS_COMPLETE_H
 
 #include "Commands.h"
-#include <boost/filesystem/path.hpp>
+//#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 namespace cdtags {
 

@@ -6,7 +6,7 @@
 #include "Remove.h"
 
 using namespace cdtags;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 int
 main(int argc, const char** argv)

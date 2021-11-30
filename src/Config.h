@@ -1,12 +1,13 @@
 #ifndef CDTAGS_CONFIG_H
 #define CDTAGS_CONFIG_H
 
-#include <boost/filesystem.hpp>
+//#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <map>
 #include <set>
 
 namespace cdtags {
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 // Readability
 typedef std::string Alias;

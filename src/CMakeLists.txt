@@ -20,7 +20,8 @@ add_executable(cdtags
         Remove.h
         Debug.h
         Debug.cpp)
-target_link_libraries(cdtags Boost::filesystem Boost::program_options)
+#target_link_libraries(cdtags Boost::filesystem Boost::program_options)
+target_link_libraries(cdtags Boost::program_options)
 target_include_directories(cdtags PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_definitions(cdtags PUBLIC _GLIBCXX_USE_CXX11_ABI=0)
 

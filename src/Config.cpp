@@ -2,6 +2,7 @@
 #include "Debug.h"
 #include <boost/algorithm/string.hpp>
 #include <iostream>
+#include <fstream>
 
 namespace cdtags {
 
@@ -58,9 +59,9 @@ void
 saveConfig(const Config& m)
 {
 
-  if (!fs::is_directory(configFile().branch_path())) {
-    std::cout << "Creating: " << configFile().branch_path() << std::endl;
-    fs::create_directories(configFile().branch_path());
+  if (!fs::is_directory(configFile().parent_path())) {
+    std::cout << "Creating: " << configFile().parent_path() << std::endl;
+    fs::create_directories(configFile().parent_path());
   }
 
   std::ofstream out(configFile().c_str());

@@ -4,6 +4,12 @@
 
 namespace cdtags {
 
+bool filename_is_dot(const fs::path & p)
+{
+    return p == fs::path(".");
+}
+
+
 std::vector<fs::path>
 list_subdirs(const fs::path& p)
 {
@@ -24,16 +30,16 @@ complete_abs_dir(const fs::path& curr,
 {
   DEBUG("abs path complete: " << curr)
   if (fs::is_directory(curr)) {
-    DEBUG(curr.has_leaf() << ": " << curr);
+    //DEBUG(curr.has_leaf() << ": " << curr);
 
-    if (fs::path(curr).filename_is_dot() || (curr == "/")) {
+    if (filename_is_dot(fs::path(curr)) || (curr == "/")) {
       DEBUG(curr << ": filename is dot");
       for (const auto& d : list_subdirs(curr)) {
         DEBUG(d << ": " << prefix);
         if (prefix.empty()) {
           std::cout << d.string() << std::endl;
         } else {
-          auto& pathString = d.string();
+          auto pathString = d.string();
           DEBUG("r: " << replacement << ": ps: " << pathString
                       << ": prefix: " << prefix)
           std::cout << replacement + pathString.substr(curr.string().size() + 1)
@@ -49,13 +55,13 @@ complete_abs_dir(const fs::path& curr,
   } else {
 
     auto parent = fs::path(curr).parent_path();
-    auto leaf = fs::path(curr).leaf().string();
+    auto leaf = fs::path(curr).filename().string();
     if (!fs::is_directory(parent)) {
       return;
     }
 
     for (const auto& d : list_subdirs(parent)) {
-      if (d.leaf().string().find(leaf) == 0) {
+      if (d.filename().string().find(leaf) == 0) {
         std::cout << d.string() << std::endl;
       }
     }
