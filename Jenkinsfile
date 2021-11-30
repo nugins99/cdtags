@@ -15,6 +15,7 @@ pipeline {
                    echo "$USER:$UID"
                    mkdir build ;
                    cd build ;
+                   cat /.conan/profiles/default
                    conan install .. --build=missing ;
                    cmake -DCMAKE_BUILD_TYPE=Release .. ;
                    make -j2 VERBOSE=1; 
