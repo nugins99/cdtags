@@ -7,7 +7,7 @@ pipeline {
                     dockerfile {
                         dir 'docker/centos8'
                         filename 'Dockerfile'
-                        args '--volume conan-data:/.conan --volume /home/ubuntu/artifacts/8:/artifacts'
+                        args '--volume conan-data:/.conan --volume /data/8:/artifacts'
                     }
             }
             steps {
@@ -32,7 +32,7 @@ pipeline {
                     dockerfile {
                         dir 'docker/centos6'
                         filename 'Dockerfile'
-                        args '--volume conan-data:/.conan --volume /home/ubuntu/artifacts/6:/artifacts'
+                        args '--volume conan-data:/.conan --volume /data/6:/artifacts'
                     }
             }
             steps {
