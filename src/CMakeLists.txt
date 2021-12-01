@@ -22,7 +22,7 @@ add_executable(cdtags
         Debug.cpp)
 target_link_libraries(cdtags Boost::program_options)
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "gcc")
+if (CMAKE_COMPILER_IS_GNUCXX MATCHES 1)
     target_link_libraries(cdtags stdc++fs)
 endif()
 
