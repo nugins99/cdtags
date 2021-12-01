@@ -21,6 +21,8 @@ pipeline {
                    make -j2 VERBOSE=1; 
                    make package;
                    mkdir -p /artifacts;
+                   ls -ld /artifacts  
+                   ls -l /artifacts  
                    cp *.sh *.gz /artifacts;
                    '''
             }
