@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.0..3.20)
 project(cdtags)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
 
 SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -25,7 +23,8 @@ set(Boost_INSTALL_DIR ${CONAN_BOOST_ROOT})
 set(Boost_DEBUG ON)
 message(STATUS "BOOST DIR: ${Boost_INSTALL_DIR}")
 #find_package(Boost 1.77.0 REQUIRED COMPONENTS filesystem program_options)
-find_package(Boost 1.77.0 REQUIRED COMPONENTS program_options)
+#find_package(Boost  REQUIRED COMPONENTS Boost::program_options)
+find_package(Boost  REQUIRED)
 
 # Source Dirs
 add_subdirectory(src)
