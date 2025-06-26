@@ -28,16 +28,21 @@ class Reader
         EndOfFile  ///< End of file or input stream.
     };
 
+    ReadStatus status() const { return m_status; }
+
     void addLine(std::string line)
     {
         {
             std::scoped_lock lock(m_mutex);
-            m_lines.push_back(std::move(line));
+            m_lines.emplace_back(std::move(line));
         }
-        onUpdate(ReadStatus::Continue);  // Notify subscribers about the update
+        onUpdate(ReadStatus::Continue, m_lines.back());  // Notify subscribers about the update
     }
 
-    boost::signals2::signal<void(ReadStatus)> onUpdate;
+    boost::signals2::signal<void(ReadStatus, std::string)> onUpdate;
+
+   protected:
+    ReadStatus m_status = ReadStatus::Continue;  ///< Current read status.
 
    private:
     mutable std::mutex m_mutex;        ///< Mutex to protect access to m_lines.

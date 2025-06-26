@@ -28,7 +28,8 @@ void AsyncFileReader::start()
     {
         addLine(line);
     }
-    onUpdate(ReadStatus::EndOfFile);  // Notify subscribers about EOF
+    m_status = ReadStatus::EndOfFile;  // Set status to End of File
+    onUpdate(m_status, "");  // Notify subscribers about the end of file
 }
 
 AsyncFileReader::~AsyncFileReader() { m_fileStream.close(); }

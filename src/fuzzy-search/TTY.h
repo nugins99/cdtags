@@ -40,6 +40,15 @@ public:
     constexpr static std::string_view clearScreen = "\033[2J\033[H";  // Clear screen and move cursor to home position
     constexpr static std::string_view red = "\033[31m";  // Red text
     constexpr static std::string_view green = "\033[32m";  // Green text
+    constexpr static std::string_view yellow = "\033[33m";  // Yellow text
+    constexpr static std::string_view blue = "\033[34m";  // Blue text
+    constexpr static std::string_view magenta = "\033[35m";  // Magenta text
+    constexpr static std::string_view cyan = "\033[36m";  // Cyan text
+    constexpr static std::string_view white = "\033[37m";  // White text    
+    constexpr static std::string_view gray = "\033[90m";  // Gray text
+    constexpr static std::string_view bold = "\033[1m";  // Bold text       
+    constexpr static std::string_view underline = "\033[4m";  // Underlined text            
+    constexpr static std::string_view reset = "\033[0m";  // Reset all attributes
 
     void clear()
     {
