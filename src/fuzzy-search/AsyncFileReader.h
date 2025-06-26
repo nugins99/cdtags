@@ -1,22 +1,22 @@
 #pragma once
-#include "AsyncReader.h"
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
 #include <string>
 
+#include "AsyncReader.h"
+
 namespace fzf
 {
 
-class AsyncFileReader : public Reader 
+class AsyncFileReader : public Reader
 {
    public:
     AsyncFileReader(const std::string& filePath);
     ~AsyncFileReader();
 
    private:
-
-   void start() override;
+    void start() override;
 
     bool validateFilePath(const std::string& filePath);
 

@@ -40,13 +40,13 @@ class Application
     void performFuzzySearch();
     void updateSelectedLineIndex();
 
-    TTY m_tty;                        ///< TTY object for terminal interaction.
-    std::mutex m_mutex;               ///< Mutex for thread safety.
-    std::string& m_searchString;      ///< The search string to use for fuzzy searching.
-    fzf::Reader::Ptr& m_inputReader;  ///< The input reader function object.
-    int m_numResults;         ///< The number of results to return.
+    TTY m_tty;                         ///< TTY object for terminal interaction.
+    std::mutex m_mutex;                ///< Mutex for thread safety.
+    std::string& m_searchString;       ///< The search string to use for fuzzy searching.
+    fzf::Reader::Ptr& m_inputReader;   ///< The input reader function object.
+    int m_numResults;                  ///< The number of results to return.
     std::size_t m_selectedIndex = -1;  ///< The index of the currently selected option.
-    std::string m_selectedLine{};     ///< The currently selected line.
+    std::string m_selectedLine{};      ///< The currently selected line.
     std::vector<std::pair<std::string, int>> m_results;  ///< Vector of scored lines.
     std::unordered_set<std::string> m_seenLines;         ///< Set to track seen lines.
     boost::signals2::scoped_connection m_connection;     ///< Connection for input reader updates.

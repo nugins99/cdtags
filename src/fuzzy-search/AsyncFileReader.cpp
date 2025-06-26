@@ -29,7 +29,7 @@ void AsyncFileReader::start()
         addLine(line);
     }
     m_status = ReadStatus::EndOfFile;  // Set status to End of File
-    onUpdate(m_status, "");  // Notify subscribers about the end of file
+    onUpdate(m_status, "");            // Notify subscribers about the end of file
 }
 
 AsyncFileReader::~AsyncFileReader() { m_fileStream.close(); }

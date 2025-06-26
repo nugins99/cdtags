@@ -1,11 +1,11 @@
 #pragma once
-#include "Reader.h"
+#include <iosfwd>
+#include <iostream>
 #include <istream>
 #include <stdexcept>
 #include <thread>
-#include <iosfwd>
-#include <iostream>
 
+#include "Reader.h"
 
 namespace fzf
 {
@@ -27,7 +27,6 @@ class AsyncReader : public Reader
     void read();
 
     std::thread m_thread;  ///< Thread for reading input asynchronously
-
 };
 
 }  // namespace fzf

@@ -1,13 +1,14 @@
 /// @file FuzzySearchApp.cpp
 /// @brief Application to perform fuzzy search using Levenshtein distance.
 
-#include "Application.h"
-#include "InputReaderFactory.h"
-#include "TTY.h"
+#include <boost/asio/io_context.hpp>
 #include <boost/program_options.hpp>
 #include <iostream>
 #include <string>
-#include <boost/asio/io_context.hpp>
+
+#include "Application.h"
+#include "InputReaderFactory.h"
+#include "TTY.h"
 
 namespace po = boost::program_options;
 
@@ -49,7 +50,7 @@ int main(int argc, char* argv[])
     try
     {
         boost::asio::io_context ioContext;  // Create an IO context for asynchronous operations
-        
+
         po::variables_map vm = parseCommandLineOptions(argc, argv);
         std::string searchString = vm["search"].as<std::string>();
         int numResults = vm["results"].as<int>();

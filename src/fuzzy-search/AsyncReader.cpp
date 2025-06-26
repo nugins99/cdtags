@@ -6,16 +6,14 @@
 namespace fzf
 {
 
-AsyncReader::AsyncReader()
-{}
+AsyncReader::AsyncReader() {}
 
-AsyncReader::~AsyncReader() {
+AsyncReader::~AsyncReader()
+{
     m_thread.join();  // Ensure the thread is joined before destruction
 }
 
-void AsyncReader::start() {
-    m_thread = std::thread(std::bind_front(&AsyncReader::read, this));
-}
+void AsyncReader::start() { m_thread = std::thread(std::bind_front(&AsyncReader::read, this)); }
 
 void AsyncReader::read()
 {
@@ -25,8 +23,7 @@ void AsyncReader::read()
         addLine(line);
     }
     m_status = ReadStatus::EndOfFile;  // Set status to End of File
-    onUpdate(m_status, "");  // Notify subscribers about the end of file
-
+    onUpdate(m_status, "");            // Notify subscribers about the end of file
 }
 
 }  // namespace fzf

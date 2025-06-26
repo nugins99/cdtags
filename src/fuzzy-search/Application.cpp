@@ -9,7 +9,10 @@
 
 Application::Application(std::string& searchString, fzf::Reader::Ptr& inputReader,
                          std::size_t numResults)
-    : m_searchString(searchString), m_inputReader(inputReader), m_numResults(numResults), log("fzf_search.log")
+    : m_searchString(searchString),
+      m_inputReader(inputReader),
+      m_numResults(numResults),
+      log("fzf_search.log")
 {
     m_connection = m_inputReader->onUpdate.connect(std::bind_front(&Application::onUpdate, this));
 }
@@ -38,7 +41,8 @@ void Application::updateSpinner(size_t count)
     static const std::string spinner = "|/-\\";
     static size_t index = 0;
     m_tty.out() << TTY::green
-                << std::format("({}) {} Updating... {}", count, spinner[count % spinner.size()], m_inputReader->data().back())
+                << std::format("({}) {} Updating... {}", count, spinner[count % spinner.size()],
+                               m_inputReader->data().back())
                 << TTY::normal << "\n";
 }
 
@@ -151,7 +155,7 @@ void Application::updateDisplay()
         << std::endl;
     // Clear screen and display options
     m_tty.clear();
-    
+
     assert(m_tty.out().good());
     m_tty.out() << std::format("{}{}/{}{} --------------------------------\n", TTY::green,
                                m_results.size(), m_numResults, TTY::normal);
@@ -172,13 +176,13 @@ void Application::updateDisplay()
     }
 
     auto firstZeroEntry = std::find_if(m_results.begin(), m_results.end(),
-                          [](const auto& result) { return result.second <= 0; });
+                                       [](const auto& result) { return result.second <= 0; });
     int lastEntryIndex = std::distance(m_results.begin(), firstZeroEntry);
-     
+
     size_t start = std::max(0, localSelectedIndex - (m_numResults / 2));
     size_t stop = std::min(lastEntryIndex, int(start + m_numResults));
-    m_tty.out() << std::format("{} - {} of {} ({}) results\n", start, stop, m_results.size(), lastEntryIndex);
-
+    m_tty.out() << std::format("{} - {} of {} ({}) results\n", start, stop, m_results.size(),
+                               lastEntryIndex);
 
     for (size_t i = start; i < stop; ++i)
     {
