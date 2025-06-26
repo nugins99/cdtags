@@ -41,7 +41,8 @@ class Application
     void updateSelectedLineIndex();
 
     TTY m_tty;                         ///< TTY object for terminal interaction.
-    std::mutex m_mutex;                ///< Mutex for thread safety.
+    std::mutex m_displayMutex;                ///< Mutex for thread safety.
+    std::mutex m_searchMutex;          ///< Mutex for search operations.
     std::string& m_searchString;       ///< The search string to use for fuzzy searching.
     fzf::Reader::Ptr& m_inputReader;   ///< The input reader function object.
     int m_numResults;                  ///< The number of results to return.

@@ -72,4 +72,42 @@ int smithWaterman(const std::string& s1, const std::string& s2)
     return maxScore;
 }
 
+int score(const std::string& search, const std::string& line)
+{
+    // This function can be used to calculate a score based on the similarity
+    // between two strings. For now, we will use the Smith-Waterman algorithm.
+    int score = smithWaterman(search, line);
+
+    if (line.find(search) != std::string::npos)
+    {
+        // If the search string is found in the line, we can boost the score
+        score += 10;  // Boost score by 10 for exact matches
+    }
+    else
+    {
+        // Look to see if all the characters in the search string are present in the line in the
+        // correct order.
+        size_t oldPos = -1;
+        size_t pos = 0;
+        for (char c : search)
+        {
+            pos = line.find(c, pos);
+            if (pos == std::string::npos)
+            {
+                // If any character is not found, we can reduce the score
+                score -= 5;  // Reduce score by 5 for missing characters
+                break;
+            }
+            else if (oldPos +1 == pos)
+            {
+                // If the character is found adjacent to the previous character, we can boost the score
+                score += 1;  // Boost score by 1 for characters found in order
+            }
+            
+            oldPos = pos;
+        }
+    }
+    return score;
+}
+
 }  // namespace fzf

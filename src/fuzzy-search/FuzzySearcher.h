@@ -33,6 +33,8 @@ int levenshteinDistance(const std::string& s1, const std::string& s2);
 /// @return The Smith-Waterman similarity score.
 int smithWaterman(const std::string& s1, const std::string& s2);
 
+int score(const std::string& s1, const std::string& s2);
+
 }  // namespace fzf
 
 #endif  // FUZZYSEARCHER_H

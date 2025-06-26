@@ -147,18 +147,10 @@ Application::FuzzySearchResult Application::processInput()
 
 void Application::updateDisplay()
 {
-    std::scoped_lock lock(m_mutex);
-    m_tty.out() << "PID: " << getpid() << "\n";
-    log << "PID: " << getpid() << "\n";
-    log << "Updating display with search string: " << m_searchString << std::endl;
-    log << "Number of options: " << m_results.size() << " Selected: " << m_selectedIndex
-        << std::endl;
+    std::scoped_lock lock(m_displayMutex);
     // Clear screen and display options
     m_tty.clear();
 
-    assert(m_tty.out().good());
-    m_tty.out() << std::format("{}{}/{}{} --------------------------------\n", TTY::green,
-                               m_results.size(), m_numResults, TTY::normal);
     int localSelectedIndex = m_selectedIndex;  // Local copy for thread safety
     if (m_selectedIndex == -1)
     {
@@ -175,20 +167,25 @@ void Application::updateDisplay()
         }
     }
 
+    // Determine the range of results to display
+    // Find the first entry with a score of zero or less
+    // This is the last possible entry that should be displayed
     auto firstZeroEntry = std::find_if(m_results.begin(), m_results.end(),
                                        [](const auto& result) { return result.second <= 0; });
     int lastEntryIndex = std::distance(m_results.begin(), firstZeroEntry);
 
+    // Start index is the middle of the results list, adjusted for the number of results to display
     size_t start = std::max(0, localSelectedIndex - (m_numResults / 2));
+    // Stop index is the minimum of the last entry index and the start index plus the number of results
     size_t stop = std::min(lastEntryIndex, int(start + m_numResults));
-    m_tty.out() << std::format("{} - {} of {} ({}) results\n", start, stop, m_results.size(),
-                               lastEntryIndex);
+    m_tty.out() << std::format("{} - {} of {} results\n", start, stop, lastEntryIndex);
 
     for (size_t i = start; i < stop; ++i)
     {
         if (m_results[i].second <= 0)
         {
-            log << "Skipping result with non-positive score: " << m_results[i].first << std::endl;
+            // Skip entries with zero or negative score
+            // Since this list is sorted, we can break early
             break;
         }
         m_tty.out() << TTY::green << i << TTY::normal;
@@ -211,16 +208,15 @@ void Application::updateDisplay()
         updateSpinner(m_inputReader->data().size());
     }
     // Display current search string
-    m_tty.out() << TTY::red << "> " << TTY::green << m_searchString << TTY::normal;
+    m_tty.out() << TTY::red << "> " << TTY::normal << m_searchString ;
     m_tty.out().flush();
 }
 
 void Application::performFuzzySearch()
 {
+    std::scoped_lock lock(m_searchMutex);
     // Get lines from input reader;
     std::vector<std::string> lines = m_inputReader->data();
-    log << "Performing fuzzy search with search string: " << m_searchString << std::endl;
-    log << "Number of lines: " << lines.size() << std::endl;
 
     m_results.clear();    // Clear previous results
     m_seenLines.clear();  // Clear seen lines
@@ -231,10 +227,8 @@ void Application::performFuzzySearch()
             log << "Skipping seen line: " << line << std::endl;
             continue;  // Skip already seen lines
         }
-        int distance = fzf::smithWaterman(m_searchString,
-                                          line);  // Using Smith-Waterman for similarity
+        int distance = fzf::score(m_searchString, line);  
 
-        log << "Score: " << distance << " Line: " << line << std::endl;
         m_results.emplace_back(line, distance);
         m_seenLines.insert(line);  // Mark line as seen
     }
@@ -247,16 +241,18 @@ void Application::performFuzzySearch()
 
 void Application::performIncrementalSearch(const std::string& line)
 {
+    std::scoped_lock lock(m_searchMutex);
     assert(!line.empty());
     log << "Performing incremental search with line: " << line << std::endl;
     if (m_seenLines.contains(line))
     {
         return;  // Skip already seen lines
     }
-    int distance = fzf::smithWaterman(m_searchString,
-                                      line);  // Using Smith-Waterman for similarity
-    m_results.emplace_back(line, distance);
+
+    int distance = fzf::score(m_searchString, line);  
+
     m_seenLines.insert(line);  // Mark line as seen
+    m_results.push_back({line, distance});
 
     // Sort results based on the distance
     std::sort(m_results.begin(), m_results.end(),
