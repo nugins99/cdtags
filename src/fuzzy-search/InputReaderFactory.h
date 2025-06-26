@@ -4,7 +4,8 @@
 #include <string>
 
 #include "AsyncFileReader.h"
-#include "AsyncReader.h"
+#include "StdinReader.h"
+#include "FileReader.h"
 
 namespace fzf
 {
@@ -19,12 +20,12 @@ inline Reader::Ptr createInputReader(const po::variables_map& vm,
 {
     if (vm.count("stdin"))
     {
-        return std::make_unique<AsyncReader>();
+        return std::make_unique<StdinReader>();
     }
     else
     {
         std::string filePath = vm["file"].as<std::string>();
-        return std::make_unique<AsyncFileReader>(filePath);
+        return std::make_unique<FileReader>(filePath);
     }
 }
 

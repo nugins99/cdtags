@@ -1,12 +1,12 @@
 add_library(fzf
 	Application.cpp
-	AsyncFileReader.cpp
-	AsyncReader.cpp
+	FileReader.cpp
+	StdinReader.cpp
 	FuzzySearcher.cpp
 	Reader.h
 	TTY.h
 	Application.h
-	AsyncFileReader.h
+	FileReader.h
 	AsyncReader.h
 	FuzzySearcher.h
 	InputReaderFactory.h
