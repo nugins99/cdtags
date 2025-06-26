@@ -60,6 +60,11 @@
         "unordered_set": "cpp",
         "variant": "cpp",
         "algorithm": "cpp",
-        "cstddef": "cpp"
+        "cstddef": "cpp",
+        "any": "cpp",
+        "codecvt": "cpp",
+        "condition_variable": "cpp",
+        "csignal": "cpp",
+        "shared_mutex": "cpp"
     }
 }
