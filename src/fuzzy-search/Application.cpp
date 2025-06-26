@@ -51,6 +51,7 @@ void Application::onUpdate(fzf::Reader::ReadStatus status)
         << (status == fzf::Reader::ReadStatus::EndOfFile ? "End of File" : "Continue")
         << std::endl;
     log << "New string: " << m_inputReader->data().back() << std::endl;
+    performFuzzySearch();       // Update options
     updateDisplay();
 }
 
@@ -94,15 +95,14 @@ void Application::onPrintableChar(char c)
 
 Application::FuzzySearchResult Application::processInput()
 {
-    assert(m_tty.in().good());
     // Read user input
     char c;
-    m_tty.in().get(c);
+    c = m_tty.getch();
 
     if (c == '\033')
     {                       // Escape sequence for arrow keys
-        m_tty.in().get(c);  // Skip '['
-        m_tty.in().get(c);  // Get actual arrow key
+        c = m_tty.getch();  // Skip '['
+        c = m_tty.getch();  // Get actual arrow key
         if (c == 'A')
         {  // Up arrow
             onUpArrow();

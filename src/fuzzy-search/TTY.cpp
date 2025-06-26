@@ -4,17 +4,17 @@
 #include "TTY.h"
 
 // Set terminal to raw mode to read keypresses
-void set_raw_mode(termios& original) {
+void set_raw_mode(int fd, termios& original) {
     termios raw;
-    tcgetattr(STDIN_FILENO, &original);
+    tcgetattr(fd, &original);
     raw = original;
     raw.c_lflag &= ~(ECHO | ICANON); // Disable echo and canonical mode
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+    tcsetattr(fd, TCSAFLUSH, &raw);
 }
 
 // Restore original terminal settings
-void restore_terminal(const termios& original) {
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &original);
+void restore_terminal(int fd, const termios& original) {
+    tcsetattr(fd, TCSAFLUSH, &original);
 }
 
 /// @brief Saves the current console contents and switches to the alternate
@@ -39,29 +39,24 @@ TTY::TTY() : m_fd(open("/dev/tty", O_RDWR)) {
         throw std::runtime_error("Failed to open /dev/tty");
     }
 
-    m_tty_in = std::make_unique<io::file_descriptor_source>(m_fd, io::never_close_handle);
+    //m_tty_in = std::make_unique<io::file_descriptor_source>(m_fd, io::never_close_handle);
     m_tty_out = std::make_unique<io::file_descriptor_sink>(m_fd, io::never_close_handle);
 
-    m_in.open(*m_tty_in);
+    //m_in.open(*m_tty_in);
     m_out.open(*m_tty_out);
 
     saveConsoleContents(*this);
-    set_raw_mode(original);
+    set_raw_mode(m_fd, original);
 }
 
 TTY::~TTY() {
 
     restoreConsoleContents(*this);
-    close(m_fd);
 
     // Restore terminal settings
-    restore_terminal(original);
+    restore_terminal(m_fd, original);
 }
 
 std::ostream& TTY::out() {
     return m_out;
-}
-
-std::istream& TTY::in() {
-    return m_in;
 }

@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "InputReader.h"
+#include "Reader.h"
 #include "TTY.h"
 
 class Application

@@ -25,7 +25,15 @@ public:
     TTY& operator=(TTY&&) = delete;  // Disable move assignment
 
     std::ostream& out();
-    std::istream& in();
+    //std::istream& in();
+    char getch()
+    {
+        char c;
+        if (read(m_fd, &c, 1) != 1) {
+            throw std::runtime_error("Failed to read from TTY");
+        }
+        return c;
+    }
 
     constexpr static std::string_view reverse = "\033[7m";  // Enter alternate screen buffer
     constexpr static std::string_view normal = "\033[0m";  // Exit alternate screen buffer
@@ -40,9 +48,9 @@ public:
 
 private:
     int m_fd;
-    std::unique_ptr<io::file_descriptor_source> m_tty_in;
+    //std::unique_ptr<io::file_descriptor_source> m_tty_in;
     std::unique_ptr<io::file_descriptor_sink> m_tty_out;
-    io::stream<io::file_descriptor_source> m_in;
+    //io::stream<io::file_descriptor_source> m_in;
     io::stream<io::file_descriptor_sink> m_out;
 
     termios original;

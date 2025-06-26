@@ -2,11 +2,12 @@
 /// @brief Application to perform fuzzy search using Levenshtein distance.
 
 #include "Application.h"
-#include "InputReader.h"
+#include "InputReaderFactory.h"
 #include "TTY.h"
 #include <boost/program_options.hpp>
 #include <iostream>
 #include <string>
+#include <boost/asio/io_context.hpp>
 
 namespace po = boost::program_options;
 
@@ -47,11 +48,13 @@ int main(int argc, char* argv[])
 {
     try
     {
+        boost::asio::io_context ioContext;  // Create an IO context for asynchronous operations
+        
         po::variables_map vm = parseCommandLineOptions(argc, argv);
         std::string searchString = vm["search"].as<std::string>();
         int numResults = vm["results"].as<int>();
 
-        fzf::Reader::Ptr inputReader = fzf::createInputReader(vm);
+        fzf::Reader::Ptr inputReader = fzf::createInputReader(vm, ioContext);
         Application app(searchString, inputReader, numResults);
         app.run();
 
