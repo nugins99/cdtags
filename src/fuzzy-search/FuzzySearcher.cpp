@@ -72,7 +72,19 @@ int smithWaterman(const std::string& s1, const std::string& s2)
     return maxScore;
 }
 
-int score(const std::string& search, const std::string& line)
+int scoreSmithWatermanAndLevenshtein(const std::string& search, const std::string& line)
+{
+    // Calculate the Smith-Waterman score
+    int swScore = smithWaterman(search, line);
+
+    // Calculate the Levenshtein distance
+    int levDistance = levenshteinDistance(search, line);
+
+    // Combine the scores
+    return swScore - levDistance;  // Higher is better
+}
+
+int scoreModifiedSmithWaterman(const std::string& search, const std::string& line)
 {
     // This function can be used to calculate a score based on the similarity
     // between two strings. For now, we will use the Smith-Waterman algorithm.
@@ -103,11 +115,16 @@ int score(const std::string& search, const std::string& line)
                 // If the character is found adjacent to the previous character, we can boost the score
                 score += 1;  // Boost score by 1 for characters found in order
             }
-            
             oldPos = pos;
         }
     }
     return score;
 }
 
+int score(const std::string& search, const std::string& line)
+{
+    // Use the modified Smith-Waterman score for fuzzy searching
+    return scoreModifiedSmithWaterman(search, line);
+    //return scoreSmithWatermanAndLevenshtein(search, line);
+}
 }  // namespace fzf
