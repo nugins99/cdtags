@@ -12,6 +12,13 @@
 
 namespace po = boost::program_options;
 
+int getTerminalHeight()
+{
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    return w.ws_row;
+}
+
 /// @brief Parses command-line options.
 /// @param argc The argument count.
 /// @param argv The argument vector.
@@ -22,7 +29,7 @@ po::variables_map parseCommandLineOptions(int argc, char* argv[])
     desc.add_options()("help,h", "Display help message")("search,s", po::value<std::string>(),
                                                          "Search string")(
         "file,f", po::value<std::string>(), "File path")("stdin", "Read input from standard input")(
-        "results,r", po::value<int>()->default_value(10), "Number of results to return");
+        "results,r", po::value<int>()->default_value(getTerminalHeight()/2), "Number of possible results");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -61,6 +68,7 @@ int main(int argc, char* argv[])
 
         // Output the selected result
         std::cout << app.result() << std::flush;
+        std::cerr << "Selected: " << app.result() << std::endl;
         return EXIT_SUCCESS;
     }
     catch (const std::exception& e)
