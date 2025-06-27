@@ -12,8 +12,7 @@ Application::Application(std::string& searchString, fzf::Reader::Ptr& inputReade
                          std::size_t numResults)
     : m_searchString(searchString),
       m_inputReader(inputReader),
-      m_numResults(numResults),
-      log("fzf_search.log")
+      m_numResults(numResults)
 {
     m_connection = m_inputReader->onUpdate.connect(std::bind_front(&Application::onUpdate, this));
 }
@@ -69,7 +68,6 @@ void Application::onUpdate(fzf::Reader::ReadStatus status, const std::string& li
 
 void Application::onUpArrow()
 {
-    log << "UP ARROW PRESSED" << std::endl;
     if (m_selectedIndex == -1)
     {
         m_selectedIndex = 0;  // Initialize selected index if not set
@@ -84,7 +82,6 @@ void Application::onUpArrow()
 
 void Application::onDownArrow()
 {
-    log << "DOWN ARROW PRESSED" << std::endl;
     if (m_selectedIndex == -1)
     {
         m_selectedIndex = 0;  // Initialize selected index if not set
@@ -98,7 +95,6 @@ void Application::onDownArrow()
 
 void Application::onBackspace()
 {
-    log << "BACKSPACE PRESSED" << std::endl;
     if (!m_searchString.empty())
     {
         m_searchString.pop_back();  // Remove last character
@@ -108,7 +104,6 @@ void Application::onBackspace()
 
 void Application::onPrintableChar(char c)
 {
-    log << "PRINTABLE CHARACTER PRESSED: " << c << std::endl;
     if (isprint(c))
     {
         m_searchString += c;   // Append character to search string
@@ -137,7 +132,6 @@ Application::FuzzySearchResult Application::processInput()
     }
     else if (c == '\n' || c == '\r')
     {  // Enter key (CR or LF)
-        log << "ENTER PRESSED" << std::endl;
         return FuzzySearchResult::Select;  // Return selected option
     }
     else if (c == '\b' || c == 127)
@@ -150,7 +144,7 @@ Application::FuzzySearchResult Application::processInput()
     }
     else
     {
-        log << "UNSUPPORTED CHARACTER PRESSED: " << int(c) << std::endl;
+        std::cerr << "UNSUPPORTED CHARACTER PRESSED: " << int(c) << std::endl;
     }
     return FuzzySearchResult::Continue;  // Continue searching
 }
@@ -185,8 +179,7 @@ void Application::updateDisplay()
     // This is the last possible entry that should be displayed
     auto firstZeroEntry = std::find_if(m_results.begin(), m_results.end(),
                                        [](const auto& result) { return result.second <= 0; });
-    //int lastEntryIndex = std::distance(m_results.begin(), firstZeroEntry);
-    int lastEntryIndex = m_results.size();
+    int lastEntryIndex = std::distance(m_results.begin(), firstZeroEntry);
     std::cerr << "\tLast entry index: " << lastEntryIndex << std::endl;
 
     // Start index is the middle of the results list, adjusted for the number of results to display
@@ -285,5 +278,5 @@ void Application::updateSelectedLineIndex()
                            [this](const auto& result) { return result.first == m_selectedLine; });
 
     m_selectedIndex = (it != m_results.end()) ? std::distance(m_results.begin(), it) : 0;
-    log << "Updating selected line index: " << m_selectedIndex << std::endl;
+    std::cerr << "Updating selected line index: " << m_selectedIndex << std::endl;
 }

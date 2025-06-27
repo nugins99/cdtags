@@ -2,7 +2,6 @@
 #define FUZZY_APPLICATION_H
 
 #include <boost/signals2.hpp>
-#include <fstream>
 #include <functional>
 #include <mutex>
 #include <string>
@@ -22,9 +21,9 @@ class Application
     /// @brief Result of a fuzzy search input processing step.
     enum class FuzzySearchResult
     {
-        Continue, ///< Continue processing input
-        Exit,     ///< Exit the application
-        Select    ///< Select the current result
+        Continue,  ///< Continue processing input
+        Exit,      ///< Exit the application
+        Select     ///< Select the current result
     };
 
     /// @brief Construct a new Application object.
@@ -79,11 +78,10 @@ class Application
     fzf::Reader::Ptr& m_inputReader;   ///< The input reader function object.
     std::vector<std::string> m_lines;  ///< Vector of lines read from input.
     int m_numResults;                  ///< The number of results to return.
-    int m_selectedIndex = -1;          ///< The index of the currently selected option.
+    int m_selectedIndex{-1};           ///< The index of the currently selected option.
     std::string m_selectedLine{};      ///< The currently selected line.
     std::vector<std::pair<std::string, int>> m_results;  ///< Vector of scored lines.
-    std::ofstream log;                 ///< Log file for debugging and tracing.
-    boost::signals2::scoped_connection m_connection;  ///< Connection for input reader updates.
+    boost::signals2::scoped_connection m_connection;     ///< Connection for input reader updates.
 };
 
 #endif  // APPLICATION_H
