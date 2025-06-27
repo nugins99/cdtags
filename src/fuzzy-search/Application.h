@@ -46,7 +46,7 @@ class Application
     std::string& m_searchString;       ///< The search string to use for fuzzy searching.
     fzf::Reader::Ptr& m_inputReader;   ///< The input reader function object.
     int m_numResults;                  ///< The number of results to return.
-    std::size_t m_selectedIndex = -1;  ///< The index of the currently selected option.
+    int m_selectedIndex = -1;  ///< The index of the currently selected option.
     std::string m_selectedLine{};      ///< The currently selected line.
     std::vector<std::pair<std::string, int>> m_results;  ///< Vector of scored lines.
     std::unordered_set<std::string> m_seenLines;         ///< Set to track seen lines.

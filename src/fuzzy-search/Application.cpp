@@ -38,10 +38,10 @@ std::string Application::result() const
 
 void Application::updateSpinner(size_t count)
 {
-    static const std::string spinner = "|/-\\";
-    static size_t index = 0;
-    m_tty.out() << TTY::green
-                << std::format("({}) {} Updating... {}", count, spinner[count % spinner.size()],
+    static constexpr std::string spinner = "|/-\\";
+    auto spinnerValue = spinner[count % spinner.size()];
+    m_tty.out() << TTY::yellow
+                << std::format("{} Updating... {}",  spinnerValue,
                                m_inputReader->data().back())
                 << TTY::normal << "\n";
 }
@@ -80,7 +80,7 @@ void Application::onDownArrow()
         m_selectedIndex = 0;  // Initialize selected index if not set
         return;
     }
-    if (m_selectedIndex < m_results.size() - 1)
+    if (m_selectedIndex < int(m_results.size() - 1))
     {
         ++m_selectedIndex;
     }
@@ -189,7 +189,7 @@ void Application::updateDisplay()
             break;
         }
         m_tty.out() << TTY::green << i << TTY::normal;
-        if (i == localSelectedIndex)
+        if (static_cast<int>(i) == localSelectedIndex)
         {
             // Highlight selected option with reverse video
             m_tty.out() << TTY::reverse;
