@@ -1,8 +1,9 @@
+FUZZY_FIND_OPTS="-not -path '*/\.*';"
+FUZZZY_SEARCH_ERROR_LOG=~/.cache/fuzzy-search-error.log
 
 __insert_fuzzy_file() {
-  local selected
-  local screen_height=$(($(tput lines) - 5))
-  selected="$(find . -type f -name .git -prune 2>/dev/null | fuzzy-search -s "" --stdin)"
+  local last_word=${READLINE_LINE:$READLINE_POINT}
+  selected="$(find . -type f ${FUZZY_FIND_OPTS}  2>/dev/null | fuzzy-search -s "$last_word" --stdin 2> $FUZZZY_SEARCH_ERROR_LOG)"
   if [[ -n "$selected" ]]; then
     READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}$selected${READLINE_LINE:$READLINE_POINT}"
     READLINE_POINT=$(( READLINE_POINT + ${#selected} ))
@@ -11,8 +12,9 @@ __insert_fuzzy_file() {
 
 __insert_fuzzy_dir() {
   local selected
-  local screen_height=$(($(tput lines) - 5))
-  selected="$(find . -type d -name .git -prune  2>/dev/null | fuzzy-search -s "" --stdin)"
+  # get last WORD from the current line
+  local last_word=${READLINE_LINE:$READLINE_POINT}
+  selected="$(find . -type d ${FUZZY_FIND_OPTS} 2>/dev/null | fuzzy-search -s "$last_word" --stdin 2> $FUZZZY_SEARCH_ERROR_LOG)"
   if [[ -n "$selected" ]]; then
     READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}$selected${READLINE_LINE:$READLINE_POINT}"
     READLINE_POINT=$(( READLINE_POINT + ${#selected} ))
@@ -20,9 +22,7 @@ __insert_fuzzy_dir() {
 }
 
 __fzf_history_search() {
-  local selected
-  local screen_height=$(($(tput lines) - 5))
-  selected="$(fuzzy-search -s "$READLINE_LINE" -f  ~/.bash_history -r $screen_height)"
+  selected="$(fuzzy-search -s "$READLINE_LINE" -f  ~/.bash_history 2> $FUZZZY_SEARCH_ERROR_LOG)"
   if [[ -n "$selected" ]]; then
     READLINE_LINE="$selected"
     READLINE_POINT=${#READLINE_LINE}
@@ -30,6 +30,5 @@ __fzf_history_search() {
 }
 
 bind -x '"\C-r": __fzf_history_search'
-bind -x '"\C-t": __insert_fuzzy_file'
-bind -x '"\ef": __insert_fuzzy_file'
-bind -x '"\ed": __insert_fuzzy_dir'
+bind -x '"\C-f": __insert_fuzzy_file'
+bind -x '"\C-t": __insert_fuzzy_dir'
