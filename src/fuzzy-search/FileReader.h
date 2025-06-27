@@ -13,7 +13,7 @@ class FileReader : public Reader
 {
    public:
     FileReader(const std::string& filePath);
-    ~FileReader();
+    ~FileReader() = default;
 
    private:
     void start() override;

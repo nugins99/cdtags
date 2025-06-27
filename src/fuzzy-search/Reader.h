@@ -25,10 +25,10 @@ class Reader
 
     /// @brief Returns a copy of all unique lines read so far.
     /// @return std::vector<std::string> The lines read.
-    std::vector<std::string> data() const
+    std::unordered_set<std::string> data() const
     {
         std::scoped_lock lock(m_mutex);
-        return m_lines;
+        return m_seenLines;
     }
 
     /// @brief Starts the reading process. Must be implemented by derived classes.
@@ -54,34 +54,31 @@ class Reader
     /// @return true if the line was added, false otherwise.
     bool addLine(std::string line)
     {
+        if (line.empty() || m_seenLines.contains(line))
         {
-            if (line.empty())
-            {
-                // Skip empty lines
-                return false;
-            }
-            std::scoped_lock lock(m_mutex);
-            if (!m_seenLines.insert(line).second)
-            {
-                // Line already seen, do not add
-                return false;
-            }
-            m_lines.emplace_back(std::move(line));
+            // Skip empty lines or line already seen, do not add
+            return false;
         }
+        std::scoped_lock lock(m_mutex);
+        m_seenLines.insert(line);  // Insert line into seen set
         // Notify subscribers about the update
-        onUpdate(ReadStatus::Continue, m_lines.back());
+        onUpdate(ReadStatus::Continue, line);
         return true;
+    }
+
+    void setEndOfFile()
+    {
+        std::scoped_lock lock(m_mutex);
+        m_status = ReadStatus::EndOfFile;  // Set status to End of File
+        onUpdate(m_status, "");            // Notify subscribers about the end of file
     }
 
     /// @brief Signal emitted when a new line is added, passing the current status and the new line.
     boost::signals2::signal<void(ReadStatus, std::string)> onUpdate;
 
-   protected:
-    ReadStatus m_status = ReadStatus::Continue;  ///< Current read status.
-
    private:
-    mutable std::mutex m_mutex;                   ///< Mutex to protect access to m_lines.
-    std::vector<std::string> m_lines;             ///< Stores the lines read from input.
+    mutable std::mutex m_mutex;                   ///< Mutex to protect access to m_seenLines.
+    ReadStatus m_status = ReadStatus::Continue;   ///< Current read status.
     std::unordered_set<std::string> m_seenLines;  ///< Set to track seen lines.
 };
 

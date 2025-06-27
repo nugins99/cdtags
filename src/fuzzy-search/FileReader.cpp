@@ -28,11 +28,8 @@ void FileReader::start()
     {
         addLine(line);
     }
-    m_status = ReadStatus::EndOfFile;  // Set status to End of File
-    onUpdate(m_status, "");            // Notify subscribers about the end of file
+    setEndOfFile();  // Set end of file status now that reading is done
 }
-
-FileReader::~FileReader() { m_fileStream.close(); }
 
 bool FileReader::validateFilePath(const std::string& filePath)
 {
