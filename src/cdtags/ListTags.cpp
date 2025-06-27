@@ -3,7 +3,7 @@
 #include "ChangeDirectory.h"
 #include "ListTags.h"
 int
-cdtags::ListTags::process(const std::vector<std::string>& args)
+cdtags::ListTags::process([[maybe_unused]] const std::vector<std::string>& args)
 {
   auto cfg = parseConfig();
   for (const auto& p : cfg.paths) {
@@ -12,7 +12,7 @@ cdtags::ListTags::process(const std::vector<std::string>& args)
   return 0;
 }
 int
-cdtags::ListTags::help(std::ostream& out)
+cdtags::ListTags::help([[maybe_unused]] std::ostream& out)
 {
   return 0;
 }

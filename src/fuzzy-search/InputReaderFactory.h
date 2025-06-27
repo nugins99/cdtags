@@ -16,7 +16,7 @@ namespace po = boost::program_options;
 /// @param vm The parsed variables map.
 /// @return A unique pointer to the input reader.
 inline Reader::Ptr createInputReader(const po::variables_map& vm,
-                                     boost::asio::io_context& ioContext)
+                                     [[maybe_unused]] boost::asio::io_context& ioContext)
 {
     if (vm.count("stdin"))
     {

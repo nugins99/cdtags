@@ -4,7 +4,7 @@ namespace fzf
 {
 
 FileReader::FileReader(const std::string& filePath)
-    : Reader(), m_filePath(filePath), m_fileStream()
+    : Reader(), m_filePath(filePath) 
 {
     if (!validateFilePath(filePath))
     {

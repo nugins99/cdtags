@@ -17,3 +17,6 @@ target_include_directories(fzf PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(fuzzy-search main.cpp)
 target_link_libraries(fuzzy-search fzf Boost::program_options Boost::iostreams)
+
+install(TARGETS fuzzy-search)
+install(FILES fuzzy-search-activate.sh DESTINATION share/cdtags)

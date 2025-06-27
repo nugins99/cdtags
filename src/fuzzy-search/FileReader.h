@@ -20,7 +20,7 @@ class FileReader : public Reader
 
     bool validateFilePath(const std::string& filePath);
 
-    std::ifstream m_fileStream;  ///< File stream to read from.
+    std::ifstream m_fileStream{};  ///< File stream to read from.
     std::string m_filePath;      ///< Path to the file to read from.
 };
 

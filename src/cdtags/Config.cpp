@@ -45,7 +45,7 @@ parseConfig()
       continue;
     }
 
-    for (int i = 1; i < fields.size(); ++i) {
+    for (std::size_t i = 1; i < fields.size(); ++i) {
       if (fields[i].empty())
         continue; // ignore empty tags
       cfg.paths[fields[i]] = fields[0];
