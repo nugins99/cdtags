@@ -5,6 +5,7 @@
 #include <format>
 #include <ranges>
 #include <iostream>
+#include "AnsiCodes.h"
 
 #include "FuzzySearcher.h"
 
@@ -40,19 +41,19 @@ std::string Application::result() const
     return m_selectedLine;  // Return empty string if no selection
 }
 
-void Application::updateSpinner(size_t count)
+void Application::updateSpinner(size_t count, std::string_view value)
 {
     static constexpr std::string_view spinner = "|/-\\";
     auto spinnerValue = spinner[count % spinner.size()];
     std::scoped_lock lock(m_linesMutex);
     if (m_lines.empty())
     {
-        m_tty.out() << TTY::yellow << std::format("{} No results found", spinnerValue)
-                    << TTY::normal << "\n";
+        m_tty.out() << ansi::fg::yellow << std::format("{} No results found", spinnerValue)
+                    << ansi::text::normal << "\n";
         return;
     }
-    m_tty.out() << TTY::yellow << std::format("{} Updating... {}", spinnerValue, m_lines.back())
-                << TTY::normal << "\n";
+    m_tty.out() << ansi::fg::yellow << std::format("{} Updating... {}", spinnerValue, value)
+                << ansi::text::normal << "\n";
 }
 
 void Application::onUpdate(fzf::Reader::ReadStatus status, const std::string& line)
@@ -60,7 +61,12 @@ void Application::onUpdate(fzf::Reader::ReadStatus status, const std::string& li
     if (status != fzf::Reader::ReadStatus::EndOfFile)
     {
         std::scoped_lock lock(m_linesMutex);
-        m_lines.push_back(line);  // Store the line read from input
+        if (line.empty() || m_lines.contains(line))
+        {
+            // Skip empty lines or lines already seen, do not add
+            return;
+        }
+        m_lines.insert(line);  // Store the line read from input
         performIncrementalSearch(line);
     }
     updateDisplay();
@@ -201,27 +207,27 @@ void Application::updateDisplay()
             // Since this list is sorted, we can break early
             //break;
         }
-        m_tty.out() << TTY::green << i << TTY::normal;
+        m_tty.out() << ansi::fg::green << i << ansi::text::normal;
         if (static_cast<int>(i) == localSelectedIndex)
         {
             // Highlight selected option with reverse video
-            m_tty.out() << TTY::reverse;
+            m_tty.out() << ansi::text::inverse;
             m_tty.out() << "> " << TTY::boldMatching(m_results[i].first, m_searchString);
-            m_tty.out() << std::format(" {}({}){}\n", TTY::gray, m_results[i].second, TTY::normal);
+            m_tty.out() << std::format(" {}({}){}\n", ansi::fg::gray, m_results[i].second, ansi::text::normal);
             m_selectedLine = m_results[i].first;  // Update selected line
         }
         else
         {
             m_tty.out() << "  " << TTY::boldMatching(m_results[i].first, m_searchString);
-            m_tty.out() << std::format(" {}({}){}\n", TTY::gray, m_results[i].second, TTY::normal);
+            m_tty.out() << std::format(" {}({}){}\n", ansi::fg::gray, m_results[i].second, ansi::text::normal);
         }
     }
     if (m_inputReader->status() == fzf::Reader::ReadStatus::Continue)
     {
-        updateSpinner(m_lines.size());
+        updateSpinner(m_lines.size(), "");
     }
     // Display current search string
-    m_tty.out() << TTY::red << "> " << TTY::normal << m_searchString;
+    m_tty.out() << ansi::fg::red << "> " << ansi::text::normal << m_searchString;
     m_tty.out().flush();
 }
 
