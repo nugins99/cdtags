@@ -1,68 +1,131 @@
-# cdtags 
+# cdtags & fuzzy-search
 
-Sort of like a replacement for "cd" but with configurable aliases.  Written in C++ & Bash.  
+A modern, fast, and flexible replacement for `cd` with configurable aliases and
+fuzzy search capabilities. Written in C++ and Bash.
 
-Often I find myself doing:
-   
-    cd /some/long/hard/to/remember/path/to/project/src
+## Features
+- **Tag-based directory navigation**: Assign short tags to long or hard-to-remember paths.
+- **Fuzzy search**: Quickly find files, directories, or history entries using the new `fuzzy-search` tool (C++).
+- **Shell integration**: Bash functions and keybindings for seamless workflow.
+- **Minimal dependencies**: No Python required; fast startup even on NFS or slow home directories. 
 
-and this is typed a lot.  Wouldn't it be faster to do:
+---
 
-    cdt proj/src
+## Why cdtags?
 
-## Alternative:
+While [dtags](https://github.com/joowani/dtags) is fantastic, it can be slow to
+initialize in some environments (e.g., NFS home directories). `cdtags` is
+designed for speed and simplicity, with a Bash-first approach and a C++ backend
+for performance-critical features.
 
-You can probably use $CDPATH to do most of this, or aliases. 
+## fuzzy-search
 
-This was heavily inspired by [dtags](https://github.com/joowani/dtags).
+I'll admin, [fzf](https://github.com/junegunn/fzf) is likely a better tool with
+better support, but it requires a go compiler, which may not be available in all
+environments.   C++ & boost is generally available in most linux environments.
+I wrote this mostly out of curiousity, but also to have a fzf-like tool on an
+environment where the toolchain needed by fzf is not available.  The core
+scoring algorithm are AI generated implementations of well-known algorithms.   A
+bulk of the dcode for this is just input/output processing needed to make a
+responsive application able to handle signifiant volumes of data that is
+streamed in.
 
-## Why:
+---
 
-While dtags is fantastic, My biggest issue is that enabling it on my terminal can take a long time,
-especially when my home directory and python install just happens to be on an NFS mount.  The time 
-spent opening a terminal is sometimes 10+ seconds.   
+## Requirements
+- conan 2.x (might not be required if boost-devel packages are provided)
+- C++17 compatible compiler
+- [Boost](https://www.boost.org/) (headers and iostreams)
+- CMake >= 3.10
 
-The bash config for this is fairly straightforward, it doesn't call out to python or run anything
-potentially expensive, but yet implements most of the same functionality as dtags. 
+---
 
-## Requirements:
+## Installation
 
-- C++11 compatible compiler.
-- boost
+```sh
+# Install cmake/C++ toolchain
+# See OS documentaiton on how to install cmake/c++ toolchain with apt/dnf
+# Install conan
+pip install conan
+# Clone Repository
+git clone <repo-url> cdtags
+cd cdtags
+# Install dependencies with conan
+conan install . --output-folder=build/release --build=missing -s build_type=Release
+# Build (Release mode recommended)
+cd build/release
+cmake -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake \
+    -DCMAKE_INSTALL_PREFIX+$(HOME)/.local \
+    ../..
+cmake --build . --parallel 
+cmake --build . --target install
+```
 
-## Installation:
+### Shell Integration
+Add the following to your `~/.bashrc`:
+```sh
+source $HOME/.local//share/cdtags/cdtags-activate.sh
+source $HOME/.local/share/cdtags/fuzzy-search/fuzzy-search-activate.sh
+```
 
-    mkdir build
-    cd build 
-    cmake -DCMAKE_BUILD_TYPE=Release .. 
-    make 
-    sudo make install
+This enables tag navigation and fuzzy search keybindings in your shell.
 
-Now add the following to your ~/.bashrc: 
-    source /usr/local/share/cdtags/cdtags-activate.sh
-
-# TODO 
-- Understand $CDPATH more and see if I can integrate it with the completion infrastructure.
-- zsh completion
-
+---
 
 # Usage
 
-## Adding a tag
-    
-    cdtags add <tag> <path>
+## Tag Management
+- **Add a tag:**
+  ```sh
+  cdtags add <tag> <path>
+  ```
+- **Remove a tag:**
+  ```sh
+  cdtags remove <tag>
+  ```
+- **List tags:**
+  ```sh
+  cdtags list
+  ```
 
-## Remove a tag
+## Directory Navigation
+- **Jump to a tag or path:**
+  ```sh
+  cdt <tag-or-path>
+  ```
+  - Works with absolute, relative, or tag-relative paths.
+  - Command-line completion is supported.
 
-    cdtags remove <tag>
+## Fuzzy Search Tool
 
-## List current tags:
-    
-    cdtags list
+The `fuzzy-search` tool provides fast, interactive fuzzy finding for files, directories, and shell history.
 
-## Changing directories:
+### Keybindings (Bash)
+- <kbd>Ctrl+f</kbd>: Fuzzy-find and insert a file path at the cursor
+- <kbd>Ctrl+t</kbd>: Fuzzy-find and insert a directory path at the cursor
+- <kbd>Ctrl+r</kbd>: Fuzzy-search your shell history
 
-    cdt path
+### Example
+```sh
+# Fuzzy search for a file in the current directory tree
+find . -type f | fuzzy-search --stdin
 
-Where "path" can be an absolute path, relative path, or tag-relative path. Command line completion
-also works here.
+# Fuzzy search for a directory
+find . -type d | fuzzy-search --stdin
+```
+
+---
+
+## Advanced
+- You can customize fuzzy-search keybindings in `fuzzy-search-activate.sh`.
+
+---
+
+## Contributing
+Pull requests and issues are welcome! Please ensure your code is formatted and tested.
+
+---
+
+## License
+MIT License. See [LICENSE.txt](LICENSE.txt).
