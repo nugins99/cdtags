@@ -3,7 +3,7 @@
 
 #include "TTY.h"
 #include <unordered_set>
-#include "AnsiCodes.h"
+#include "common/AnsiCodes.h"
 
 // Set terminal to raw mode to read keypresses
 void set_raw_mode(int fd, termios& original)

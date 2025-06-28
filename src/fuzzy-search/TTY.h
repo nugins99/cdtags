@@ -4,6 +4,7 @@
 #ifndef TTY_H
 #define TTY_H
 
+#include <common/AnsiCodes.h>
 #include <fcntl.h>
 #include <termios.h>  // For terminal settings
 #include <unistd.h>
@@ -13,7 +14,6 @@
 #include <memory>
 #include <stdexcept>
 #include <unordered_set>
-#include "AnsiCodes.h"
 
 namespace io = boost::iostreams;
 
@@ -56,8 +56,6 @@ class TTY
         }
         return c;
     }
-
-    
 
     /// @brief Clear the terminal screen.
     void clear()

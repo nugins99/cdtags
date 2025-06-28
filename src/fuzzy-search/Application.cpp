@@ -1,19 +1,18 @@
 #include "Application.h"
 
+#include <common/AnsiCodes.h>
+
 #include <algorithm>
 #include <cassert>
 #include <format>
-#include <ranges>
 #include <iostream>
-#include "AnsiCodes.h"
+#include <ranges>
 
 #include "FuzzySearcher.h"
 
 Application::Application(std::string& searchString, fzf::Reader::Ptr& inputReader,
                          std::size_t numResults)
-    : m_searchString(searchString),
-      m_inputReader(inputReader),
-      m_numResults(numResults)
+    : m_searchString(searchString), m_inputReader(inputReader), m_numResults(numResults)
 {
     m_connection = m_inputReader->onUpdate.connect(std::bind_front(&Application::onUpdate, this));
 }
@@ -137,7 +136,7 @@ Application::FuzzySearchResult Application::processInput()
         }
     }
     else if (c == '\n' || c == '\r')
-    {  // Enter key (CR or LF)
+    {                                      // Enter key (CR or LF)
         return FuzzySearchResult::Select;  // Return selected option
     }
     else if (c == '\b' || c == 127)
@@ -205,7 +204,7 @@ void Application::updateDisplay()
         {
             // Skip entries with zero or negative score
             // Since this list is sorted, we can break early
-            //break;
+            // break;
         }
         m_tty.out() << ansi::fg::green << i << ansi::text::normal;
         if (static_cast<int>(i) == localSelectedIndex)
@@ -213,13 +212,15 @@ void Application::updateDisplay()
             // Highlight selected option with reverse video
             m_tty.out() << ansi::text::inverse;
             m_tty.out() << "> " << TTY::boldMatching(m_results[i].first, m_searchString);
-            m_tty.out() << std::format(" {}({}){}\n", ansi::fg::gray, m_results[i].second, ansi::text::normal);
+            m_tty.out() << std::format(" {}({}){}\n", ansi::fg::gray, m_results[i].second,
+                                       ansi::text::normal);
             m_selectedLine = m_results[i].first;  // Update selected line
         }
         else
         {
             m_tty.out() << "  " << TTY::boldMatching(m_results[i].first, m_searchString);
-            m_tty.out() << std::format(" {}({}){}\n", ansi::fg::gray, m_results[i].second, ansi::text::normal);
+            m_tty.out() << std::format(" {}({}){}\n", ansi::fg::gray, m_results[i].second,
+                                       ansi::text::normal);
         }
     }
     if (m_inputReader->status() == fzf::Reader::ReadStatus::Continue)
@@ -235,7 +236,8 @@ bool resultCompare(const std::pair<std::string, int>& a, const std::pair<std::st
 {
     if (a.second == b.second)
     {
-        return b.first.size() > a.first.size();  // Compare based on the first element (line) if scores are equal
+        return b.first.size() >
+               a.first.size();  // Compare based on the first element (line) if scores are equal
     }
     return b.second < a.second;  // Compare based on the second element (score)
 }

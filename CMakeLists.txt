@@ -5,6 +5,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_CXX_STANDARD 20)
 
+include_directories(${CMAKE_SOURCE_DIR}/src)
+
 set(Boost_FIND_QUIETLY VERBOSE)
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
@@ -20,9 +22,9 @@ else()
 # Set the package version.
 # This applies to both the RPM package and # a "configure_file" command to
 # replace values in src/Version.h.in"
-set(CPACK_PACKAGE_VERSION_MAJOR "1")
-set(CPACK_PACKAGE_VERSION_MINOR "1")
-set(CPACK_PACKAGE_VERSION_PATCH "1")
+set(CPACK_PACKAGE_VERSION_MAJOR "2")
+set(CPACK_PACKAGE_VERSION_MINOR "0")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
 
 # Boost
 find_package(Boost REQUIRED COMPONENTS  Boost::program_options)
