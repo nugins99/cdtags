@@ -22,7 +22,7 @@ __insert_fuzzy_dir() {
 }
 
 __fzf_history_search() {
-  selected="$(history | fuzzy-search -s "$READLINE_LINE" --stdin 2> $FUZZZY_SEARCH_ERROR_LOG)"
+  selected="$(history|awk '{$1="";print substr($0,2)}' | fuzzy-search -s "$READLINE_LINE" --stdin 2> $FUZZZY_SEARCH_ERROR_LOG)"
   if [[ -n "$selected" ]]; then
     READLINE_LINE="$selected"
     READLINE_POINT=${#READLINE_LINE}
