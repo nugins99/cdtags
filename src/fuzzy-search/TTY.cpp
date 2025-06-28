@@ -2,6 +2,8 @@
 /// @brief Implementation of the TTY class.
 
 #include "TTY.h"
+#include <unordered_set>
+#include "AnsiCodes.h"
 
 // Set terminal to raw mode to read keypresses
 void set_raw_mode(int fd, termios& original)
@@ -58,3 +60,25 @@ TTY::~TTY()
 }
 
 std::ostream& TTY::out() { return m_out; }
+
+std::string TTY::boldMatching(const std::string& text, const std::string& chars_to_bold)
+{
+    std::unordered_set<char> bold_chars(chars_to_bold.begin(), chars_to_bold.end());
+    std::string result;
+    for (char c : text)
+    {
+        if (bold_chars.count(c))
+        {
+            result += ansi::text::bold;
+            result += ansi::fg::yellow;
+            result += c;
+            result += ansi::reset::fg;
+            result += ansi::reset::bold;
+        }
+        else
+        {
+            result += c;
+        }
+    }
+    return result;
+}

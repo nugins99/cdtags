@@ -13,6 +13,7 @@
 #include <memory>
 #include <stdexcept>
 #include <unordered_set>
+#include "AnsiCodes.h"
 
 namespace io = boost::iostreams;
 
@@ -56,54 +57,19 @@ class TTY
         return c;
     }
 
-    /// @name ANSI Escape Codes
-    ///@{
-    constexpr static std::string_view reverse = "\033[7m";  ///< Reverse video (highlight)
-    constexpr static std::string_view normal = "\033[0m";   ///< Reset all attributes
-    constexpr static std::string_view clearScreen =
-        "\033[2J\033[H";  ///< Clear screen and move cursor to home position
-    constexpr static std::string_view red = "\033[31m";       ///< Red text
-    constexpr static std::string_view green = "\033[32m";     ///< Green text
-    constexpr static std::string_view yellow = "\033[33m";    ///< Yellow text
-    constexpr static std::string_view blue = "\033[34m";      ///< Blue text
-    constexpr static std::string_view magenta = "\033[35m";   ///< Magenta text
-    constexpr static std::string_view cyan = "\033[36m";      ///< Cyan text
-    constexpr static std::string_view white = "\033[37m";     ///< White text
-    constexpr static std::string_view gray = "\033[90m";      ///< Gray text
-    constexpr static std::string_view bold = "\033[1m";       ///< Bold text
-    constexpr static std::string_view underline = "\033[4m";  ///< Underlined text
-    constexpr static std::string_view reset = "\033[0m";      ///< Reset all attributes
-    ///@}
+    
 
     /// @brief Clear the terminal screen.
     void clear()
     {
-        out() << TTY::clearScreen;  // Clear screen
+        out() << ansi::cursor::clearScreen;  // Clear screen
     }
 
     /// @brief Return a copy of text with any character in chars_to_bold wrapped in ANSI bold codes.
     /// @param text The string to process.
     /// @param chars_to_bold The set of characters to bold.
     /// @return std::string The processed string with bolded characters.
-    static std::string boldMatching(const std::string& text, const std::string& chars_to_bold)
-    {
-        std::unordered_set<char> bold_chars(chars_to_bold.begin(), chars_to_bold.end());
-        std::string result;
-        for (char c : text)
-        {
-            if (bold_chars.count(c))
-            {
-                result += TTY::bold;
-                result += c;
-                result += TTY::normal;
-            }
-            else
-            {
-                result += c;
-            }
-        }
-        return result;
-    }
+    static std::string boldMatching(const std::string& text, const std::string& chars_to_bold);
 
    private:
     int m_fd;  ///< File descriptor for /dev/tty
