@@ -1,7 +1,13 @@
 # cdtags & fuzzy-search
 
+## cdtags
 A modern, fast, and flexible replacement for `cd` with configurable aliases and
 fuzzy search capabilities. Written in C++ and Bash.
+
+## fuzzy-search
+An attempt at reimplementing some of [fzf](https://github.com/junegunn/fzf) in
+C++.   This was done out of curiousity and intended to be useful in environments
+where using fzf is not feasible due to technical and/or policy reasons. 
 
 ## Features
 - **Tag-based directory navigation**: Assign short tags to long or hard-to-remember paths.
@@ -22,13 +28,17 @@ for performance-critical features.
 
 I'll admin, [fzf](https://github.com/junegunn/fzf) is likely a better tool with
 better support, but it requires a go compiler, which may not be available in all
-environments.   C++ & boost is generally available in most linux environments.
+environments.  C++ & boost is generally available in most Linux environments.
 I wrote this mostly out of curiousity, but also to have a fzf-like tool on an
 environment where the toolchain needed by fzf is not available.  The core
-scoring algorithm are AI generated implementations of well-known algorithms.   A
+scoring algorithm are AI generated implementations of well-known algorithms. A
 bulk of the dcode for this is just input/output processing needed to make a
 responsive application able to handle signifiant volumes of data that is
 streamed in.
+
+Both fzf and fuzzy-search use a modified version of  the
+[Smith-Waterman](https://en.wikipedia.org/wiki/Smith–Waterman_algorithm)
+algorithm. 
 
 ---
 
