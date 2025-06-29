@@ -8,6 +8,7 @@
 #include <string>
 
 #include "Application.h"
+#include "Controller.h"
 #include "InputReaderFactory.h"
 #include "TTY.h"
 
@@ -60,9 +61,12 @@ int main(int argc, char* argv[])
         int numResults = vm["results"].as<int>();
         std::string resultBase{};
 
+        TTY tty;
         fzf::Reader::Ptr inputReader = fzf::createInputReader(vm, ioContext);
-        Application app(searchString, inputReader, numResults);
-        app.run();
+        Application app(searchString, inputReader, tty, numResults);
+        fzf::Controller controller(tty, app);
+        inputReader->start();
+        controller.run();
 
         // Output the selected result
         std::cout << app.result() << std::flush;

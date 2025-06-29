@@ -10,9 +10,9 @@
 
 #include "FuzzySearcher.h"
 
-Application::Application(std::string& searchString, fzf::Reader::Ptr& inputReader,
+Application::Application(std::string& searchString, fzf::Reader::Ptr& inputReader, TTY & tty,
                          std::size_t numResults)
-    : m_searchString(searchString), m_inputReader(inputReader), m_numResults(numResults)
+    : m_tty(tty), m_searchString(searchString), m_inputReader(inputReader), m_numResults(numResults)
 {
     m_connection = m_inputReader->onUpdate.connect(std::bind_front(&Application::onUpdate, this));
 }
@@ -21,17 +21,7 @@ Application::~Application()
     m_inputReader->stop();  // Ensure input reader is stopped
 }
 
-void Application::run()
-{
-    m_inputReader->start();  // Start the input reader
-
-    while (processInput() == FuzzySearchResult::Continue)
-    {
-        updateDisplay();
-    }
-}
-
-std::string Application::result() const
+std::string_view Application::result() const 
 {
     if (m_selectedIndex == -1)
     {
@@ -69,89 +59,6 @@ void Application::onUpdate(fzf::Reader::ReadStatus status, const std::string& li
         performIncrementalSearch(line);
     }
     updateDisplay();
-}
-
-void Application::onUpArrow()
-{
-    if (m_selectedIndex == -1)
-    {
-        m_selectedIndex = 0;  // Initialize selected index if not set
-        return;
-    }
-
-    if (m_selectedIndex > 0)
-    {
-        --m_selectedIndex;  // Move up in the results
-    }
-}
-
-void Application::onDownArrow()
-{
-    if (m_selectedIndex == -1)
-    {
-        m_selectedIndex = 0;  // Initialize selected index if not set
-        return;
-    }
-    if (m_selectedIndex < int(m_results.size() - 1))
-    {
-        ++m_selectedIndex;
-    }
-}
-
-void Application::onBackspace()
-{
-    if (!m_searchString.empty())
-    {
-        m_searchString.pop_back();  // Remove last character
-        performFuzzySearch();       // Update options
-    }
-}
-
-void Application::onPrintableChar(char c)
-{
-    if (isprint(c))
-    {
-        m_searchString += c;   // Append character to search string
-        performFuzzySearch();  // Update options
-    }
-}
-
-Application::FuzzySearchResult Application::processInput()
-{
-    // Read user input
-    char c;
-    c = m_tty.getch();
-
-    if (c == '\033')
-    {                       // Escape sequence for arrow keys
-        c = m_tty.getch();  // Skip '['
-        c = m_tty.getch();  // Get actual arrow key
-        if (c == 'A')
-        {  // Up arrow
-            onUpArrow();
-        }
-        else if (c == 'B')
-        {  // Down arrow
-            onDownArrow();
-        }
-    }
-    else if (c == '\n' || c == '\r')
-    {                                      // Enter key (CR or LF)
-        return FuzzySearchResult::Select;  // Return selected option
-    }
-    else if (c == '\b' || c == 127)
-    {  // Backspace key (127 for macOS)
-        onBackspace();
-    }
-    else if (isprint(c))
-    {                        // Printable characters
-        onPrintableChar(c);  // Append character to search string
-    }
-    else
-    {
-        std::cerr << "UNSUPPORTED CHARACTER PRESSED: " << int(c) << std::endl;
-    }
-    return FuzzySearchResult::Continue;  // Continue searching
 }
 
 void Application::updateDisplay()

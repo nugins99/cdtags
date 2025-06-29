@@ -14,6 +14,7 @@
 #include <memory>
 #include <stdexcept>
 #include <unordered_set>
+#include "InputInterface.h"
 
 namespace io = boost::iostreams;
 
@@ -26,13 +27,13 @@ namespace io = boost::iostreams;
 /// screen.  The class also includes ANSI escape codes for text formatting, such
 /// as colors and styles.  The TTY class manages terminal settings and restores
 /// them upon destruction to ensure the terminal remains in a usable state.
-class TTY
+class TTY : public fzf::InputInterface
 {
    public:
     /// @brief Construct a new TTY object and open /dev/tty for I/O.
     TTY();
     /// @brief Destructor. Restores terminal settings and closes file descriptors.
-    ~TTY();
+    ~TTY() override;
 
     TTY(const TTY&) = delete;             ///< Disable copy constructor
     TTY& operator=(const TTY&) = delete;  ///< Disable copy assignment
@@ -42,12 +43,11 @@ class TTY
     /// @brief Get the output stream for writing to the terminal.
     /// @return std::ostream& Reference to the output stream.
     std::ostream& out();
-    // std::istream& in();
 
     /// @brief Read a single character from the terminal (blocking).
     /// @throws std::runtime_error if reading fails.
     /// @return char The character read.
-    char getch()
+    char getch() override
     {
         char c;
         if (read(m_fd, &c, 1) != 1)

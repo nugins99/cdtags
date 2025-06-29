@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "ModelInterface.h"
 #include "Reader.h"
 #include "TTY.h"
 
@@ -15,7 +16,7 @@
 ///
 /// Handles user input, manages search state, and displays results in the terminal.
 /// Uses a TTY for terminal I/O and a Reader for input data. Thread-safe for concurrent updates.
-class Application
+class Application : public fzf::ModelInterface
 {
    public:
     /// @brief Result of a fuzzy search input processing step.
@@ -30,15 +31,57 @@ class Application
     /// @param searchString Reference to the search string to use for fuzzy searching.
     /// @param inputReader Reference to the input reader function object.
     /// @param numResults The number of results to return/display.
-    Application(std::string& searchString, fzf::Reader::Ptr& inputReader, std::size_t numResults);
+    Application(std::string& searchString, fzf::Reader::Ptr& inputReader, TTY & tty, std::size_t numResults);
     /// @brief Destructor. Ensures input reader is stopped.
     ~Application();
 
-    /// @brief Run the main application loop.
-    void run();
     /// @brief Get the currently selected result string.
     /// @return std::string The selected line, or the first result if none selected.
-    std::string result() const;
+    std::string_view result() const override;
+
+    /// @brief Get the current search string.
+    std::string searchString() const override { return m_searchString; }
+
+    /// @brief  Set the search string and update the model.
+    /// @param searchString
+    void setSearchString(std::string searchString) override
+    {
+        m_searchString = std::move(searchString);
+        performFuzzySearch();
+        updateDisplay();
+    }
+    /// @brief Finish the search and clean up resources.
+    void finishSearch()
+    {
+        m_inputReader->setEndOfFile();  // Signal end of input
+        m_connection.disconnect();      // Disconnect from input updates
+    }
+
+    /// @brief Get the currently selected result index.
+    int getSelectedIndex() const override { return m_selectedIndex; }
+
+    /// @brief  Set the currently selected result index.
+    /// @param index
+    void setSelectedIndex(int index) override
+    {
+        if (index < 0 || index >= static_cast<int>(m_results.size()))
+        {
+            m_selectedIndex = -1;  // Reset selection if index is out of bounds
+            m_selectedLine.clear();
+            return;
+        }
+
+        if (index < static_cast<int>(m_results.size()))
+        {
+            m_selectedIndex = index;
+            m_selectedLine = m_results[index].first;
+        }
+        updateDisplay();
+    }
+
+    /// @brief Get the number of results in the model.
+    /// @return The number of results.
+    std::size_t size() const override { return m_results.size(); }
 
    private:
     /// @brief Update the spinner/progress indicator in the terminal.
@@ -48,18 +91,6 @@ class Application
     /// @param status The read status.
     /// @param line The new line read.
     void onUpdate(fzf::Reader::ReadStatus status, const std::string& line);
-    /// @brief Handle up arrow key input.
-    void onUpArrow();
-    /// @brief Handle down arrow key input.
-    void onDownArrow();
-    /// @brief Handle backspace key input.
-    void onBackspace();
-    /// @brief Handle printable character input.
-    /// @param c The character pressed.
-    void onPrintableChar(char c);
-    /// @brief Process a single user input event.
-    /// @return FuzzySearchResult The result of processing input.
-    FuzzySearchResult processInput();
     /// @brief Update the terminal display with current results and state.
     void updateDisplay();
     /// @brief Perform an incremental search as new lines are read.
@@ -70,7 +101,7 @@ class Application
     /// @brief Update the selected line index based on current results.
     void updateSelectedLineIndex();
 
-    TTY m_tty;                                ///< TTY object for terminal interaction.
+    TTY & m_tty;                                ///< TTY object for terminal interaction.
     std::mutex m_displayMutex;                ///< Mutex for thread safety.
     std::mutex m_searchMutex;                 ///< Mutex for search operations.
     std::mutex m_linesMutex;                  ///< Mutex for lines read from input.

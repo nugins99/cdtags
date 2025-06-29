@@ -1,5 +1,6 @@
 [requires]
 boost/1.82.0
+gtest/1.8.1
 
 [options]
 boost/*:header_only=False
