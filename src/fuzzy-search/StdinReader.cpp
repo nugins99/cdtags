@@ -10,7 +10,9 @@ StdinReader::StdinReader() {}
 
 StdinReader::~StdinReader()
 {
-    m_thread.join();  // Ensure the thread is joined before destruction
+    if (m_thread.joinable()) {
+        m_thread.join();  // Ensure the thread is joined before destruction
+    }
 }
 
 void StdinReader::start() { m_thread = std::thread(std::bind_front(&StdinReader::read, this)); }
@@ -18,7 +20,10 @@ void StdinReader::start() { m_thread = std::thread(std::bind_front(&StdinReader:
 void StdinReader::stop()
 {
     m_stop = true;
-    m_thread.join();                   // Wait for the reading thread to finish
+    if (m_thread.joinable())
+    {
+        m_thread.join();                   // Wait for the reading thread to finish
+    }
 }
 
 void StdinReader::read()
