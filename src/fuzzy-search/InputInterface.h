@@ -3,8 +3,8 @@
 namespace fzf
 {
 
-    /// @class InputInterface
-    /// @brief An interface for reading input from the user.
+/// @class InputInterface
+/// @brief An interface for reading input from the user.
 class InputInterface
 {
    public:

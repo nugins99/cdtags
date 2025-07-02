@@ -86,6 +86,11 @@ int scoreSmithWatermanAndLevenshtein(const std::string& search, const std::strin
 
 int scoreModifiedSmithWaterman(const std::string& search, const std::string& line)
 {
+    if (search.empty())
+    {
+        return 1;
+    }
+
     // This function can be used to calculate a score based on the similarity
     // between two strings. For now, we will use the Smith-Waterman algorithm.
     int score = smithWaterman(search, line);

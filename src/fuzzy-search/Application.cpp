@@ -5,23 +5,23 @@
 #include <algorithm>
 #include <cassert>
 #include <format>
-#include <iostream>
 #include <ranges>
 
 #include "FuzzySearcher.h"
 
-Application::Application(std::string& searchString, fzf::Reader::Ptr& inputReader, TTY & tty,
+Application::Application(std::string& searchString, fzf::Reader::Ptr& inputReader, TTY& tty,
                          std::size_t numResults)
     : m_tty(tty), m_searchString(searchString), m_inputReader(inputReader), m_numResults(numResults)
 {
     m_connection = m_inputReader->onUpdate.connect(std::bind_front(&Application::onUpdate, this));
 }
+
 Application::~Application()
 {
     m_inputReader->stop();  // Ensure input reader is stopped
 }
 
-std::string_view Application::result() const 
+std::string_view Application::result() const
 {
     if (m_selectedIndex == -1)
     {
@@ -30,18 +30,11 @@ std::string_view Application::result() const
     return m_selectedLine;  // Return empty string if no selection
 }
 
-void Application::updateSpinner(size_t count, std::string_view value)
+void Application::updateSpinner(size_t count)
 {
     static constexpr std::string_view spinner = "|/-\\";
-    auto spinnerValue = spinner[count % spinner.size()];
-    std::scoped_lock lock(m_linesMutex);
-    if (m_lines.empty())
-    {
-        m_tty.out() << ansi::fg::yellow << std::format("{} No results found", spinnerValue)
-                    << ansi::text::normal << "\n";
-        return;
-    }
-    m_tty.out() << ansi::fg::yellow << std::format("{} Updating... {}", spinnerValue, value)
+    const auto spinnerValue = spinner[count % spinner.size()];
+    m_tty.out() << ansi::fg::yellow << std::format("{} Updating...", spinnerValue)
                 << ansi::text::normal << "\n";
 }
 
@@ -49,13 +42,6 @@ void Application::onUpdate(fzf::Reader::ReadStatus status, const std::string& li
 {
     if (status != fzf::Reader::ReadStatus::EndOfFile)
     {
-        std::scoped_lock lock(m_linesMutex);
-        if (line.empty() || m_lines.contains(line))
-        {
-            // Skip empty lines or lines already seen, do not add
-            return;
-        }
-        m_lines.insert(line);  // Store the line read from input
         performIncrementalSearch(line);
     }
     updateDisplay();
@@ -63,17 +49,15 @@ void Application::onUpdate(fzf::Reader::ReadStatus status, const std::string& li
 
 void Application::updateDisplay()
 {
-    std::scoped_lock lock(m_displayMutex);
+    std::scoped_lock lock(m_searchMutex);
     // Clear screen and display options
     m_tty.clear();
-    std::cerr << "Updating display with search string: " << m_searchString << std::endl;
 
     int localSelectedIndex = m_selectedIndex;  // Local copy for thread safety
     if (m_selectedIndex == -1)
     {
         localSelectedIndex = 0;  // Initialize selected index if not set
     }
-    std::cerr << "\tLocal selected index: " << localSelectedIndex << std::endl;
 
     // Find last index with non-zero score
     for (size_t i = m_results.size(); i > 0; --i)
@@ -84,7 +68,6 @@ void Application::updateDisplay()
             break;  // Found a valid index
         }
     }
-    std::cerr << "\tAdjusted local selected index: " << localSelectedIndex << std::endl;
 
     // Determine the range of results to display
     // Find the first entry with a score of zero or less
@@ -92,7 +75,6 @@ void Application::updateDisplay()
     auto firstZeroEntry = std::find_if(m_results.begin(), m_results.end(),
                                        [](const auto& result) { return result.second <= 0; });
     int lastEntryIndex = std::distance(m_results.begin(), firstZeroEntry);
-    std::cerr << "\tLast entry index: " << lastEntryIndex << std::endl;
 
     // Start index is the middle of the results list, adjusted for the number of results to display
     size_t start = std::max(0, localSelectedIndex - (m_numResults / 2));
@@ -104,8 +86,6 @@ void Application::updateDisplay()
 
     for (size_t i = start; i < stop; ++i)
     {
-        std::cerr << "\tProcessing result: " << i << " - " << m_results[i].first
-                  << " with score: " << m_results[i].second << std::endl;
         // Check if the score is zero or less
         if (m_results[i].second <= 0)
         {
@@ -132,7 +112,7 @@ void Application::updateDisplay()
     }
     if (m_inputReader->status() == fzf::Reader::ReadStatus::Continue)
     {
-        updateSpinner(m_lines.size(), "");
+        updateSpinner(m_results.size());
     }
     // Display current search string
     m_tty.out() << ansi::fg::red << "> " << ansi::text::normal << m_searchString;
@@ -154,18 +134,13 @@ void Application::performFuzzySearch()
     std::scoped_lock lock(m_searchMutex);
     // Get lines from input reader;
     {
-        std::scoped_lock lock(m_linesMutex);
-        m_lines = m_inputReader->data();
-
-        m_results.clear();  // Clear previous results
-        for (const auto& line : m_lines)
+        for (auto& line : m_results)
         {
-            int distance = fzf::score(m_searchString, line);
-            m_results.emplace_back(line, distance);
+            line.second = fzf::score(m_searchString, line.first);
         }
     }
 
-    // Sort results based on the distance
+    // Sort results based on the score
     std::ranges::sort(m_results, resultCompare);
     updateSelectedLineIndex();  // Update selected line index
 }
@@ -174,11 +149,11 @@ void Application::performIncrementalSearch(const std::string& line)
 {
     std::scoped_lock lock(m_searchMutex);
     assert(!line.empty());
-    int distance = fzf::score(m_searchString, line);
-    // Insert & Sort results based on the distance
-    // TODO - this is not efficient, we should insert in the right place as
-    // results are already sorted.
-    m_results.push_back({line, distance});
+    int score = fzf::score(m_searchString, line);
+
+    // Insert into sorted list
+    auto insertPos = std::ranges::lower_bound(m_results, std::make_pair(line, score));
+    m_results.insert(insertPos, {line, score});
     std::ranges::sort(m_results, resultCompare);
     updateSelectedLineIndex();  // Update selected line index
 }
@@ -193,5 +168,4 @@ void Application::updateSelectedLineIndex()
                            [this](const auto& result) { return result.first == m_selectedLine; });
 
     m_selectedIndex = (it != m_results.end()) ? std::distance(m_results.begin(), it) : 0;
-    std::cerr << "Updating selected line index: " << m_selectedIndex << std::endl;
 }

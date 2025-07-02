@@ -25,7 +25,7 @@ class Reader
 
     /// @brief Returns a copy of all unique lines read so far.
     /// @return std::vector<std::string> The lines read.
-    std::unordered_set<std::string> data() const
+    std::unordered_set<std::size_t> getSeenValues() const
     {
         std::scoped_lock lock(m_mutex);
         return m_seenLines;
@@ -54,13 +54,14 @@ class Reader
     /// @return true if the line was added, false otherwise.
     bool addLine(std::string line)
     {
-        if (line.empty() || m_seenLines.contains(line))
+        auto hashValue =  m_hash(line);
+        if (line.empty() || m_seenLines.contains(hashValue))
         {
             // Skip empty lines or line already seen, do not add
             return false;
         }
         std::scoped_lock lock(m_mutex);
-        m_seenLines.insert(line);  // Insert line into seen set
+        m_seenLines.insert(hashValue);  // Insert line into seen set
         // Notify subscribers about the update
         onUpdate(ReadStatus::Continue, line);
         return true;
@@ -79,7 +80,9 @@ class Reader
    private:
     mutable std::mutex m_mutex;                   ///< Mutex to protect access to m_seenLines.
     ReadStatus m_status = ReadStatus::Continue;   ///< Current read status.
-    std::unordered_set<std::string> m_seenLines;  ///< Set to track seen lines.
+    //std::unordered_set<std::string> m_seenLines;  ///< Set to track seen lines.
+    std::hash<std::string> m_hash{};
+    std::unordered_set<std::size_t> m_seenLines;  ///< Set to track seen lines.
 };
 
 }  // namespace fzf

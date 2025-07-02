@@ -86,7 +86,7 @@ class Application : public fzf::ModelInterface
    private:
     /// @brief Update the spinner/progress indicator in the terminal.
     /// @param count Number of lines processed or spinner step.
-    void updateSpinner(size_t count, std::string_view value);
+    void updateSpinner(size_t count);
     /// @brief Handle updates from the input reader.
     /// @param status The read status.
     /// @param line The new line read.
@@ -102,12 +102,9 @@ class Application : public fzf::ModelInterface
     void updateSelectedLineIndex();
 
     TTY & m_tty;                                ///< TTY object for terminal interaction.
-    std::mutex m_displayMutex;                ///< Mutex for thread safety.
     std::mutex m_searchMutex;                 ///< Mutex for search operations.
-    std::mutex m_linesMutex;                  ///< Mutex for lines read from input.
     std::string& m_searchString;              ///< The search string to use for fuzzy searching.
     fzf::Reader::Ptr& m_inputReader;          ///< The input reader function object.
-    std::unordered_set<std::string> m_lines;  ///< Vector of lines read from input.
     int m_numResults;                         ///< The number of results to return.
     int m_selectedIndex{-1};                  ///< The index of the currently selected option.
     std::string m_selectedLine{};             ///< The currently selected line.
