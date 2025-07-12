@@ -97,7 +97,10 @@ class Controller
     {
         // Handle down arrow key input
         auto selectedIndex = m_model.getSelectedIndex();
-        if (selectedIndex < static_cast<int>(m_model.size() - 1))
+        if (selectedIndex == -1 && m_model.size() >= 1)
+        {
+            m_model.setSelectedIndex(1);
+        } else if (selectedIndex < static_cast<int>(m_model.size() - 1))
         {
             m_model.setSelectedIndex(selectedIndex + 1);
         }
