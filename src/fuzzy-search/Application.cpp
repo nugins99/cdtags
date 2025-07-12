@@ -13,11 +13,12 @@ Application::Application(std::string& searchString, fzf::Reader::Ptr& inputReade
                          std::size_t numResults)
     : m_tty(tty), m_searchString(searchString), m_inputReader(inputReader), m_numResults(numResults)
 {
-    m_connection = m_inputReader->onUpdate.connect(std::bind_front(&Application::onUpdate, this));
+    m_inputReader->onUpdate = std::bind_front(&Application::onUpdate, this);
 }
 
 Application::~Application()
 {
+    m_inputReader->disconnect();
     m_inputReader->stop();  // Ensure input reader is stopped
 }
 

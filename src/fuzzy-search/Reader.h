@@ -1,5 +1,4 @@
 #pragma once
-#include <boost/signals2.hpp>
 #include <mutex>
 #include <string>
 #include <unordered_set>
@@ -36,6 +35,13 @@ class Reader
 
     /// @brief Stops the reading process. Optional to override.
     virtual void stop() {}
+
+    // Clear the callback
+    void disconnect()
+    {
+        std::scoped_lock lock(m_mutex);
+        onUpdate = {};
+    }
 
     /// @enum ReadStatus
     /// @brief Indicates whether input is ongoing or finished.
@@ -75,10 +81,10 @@ class Reader
     }
 
     /// @brief Signal emitted when a new line is added, passing the current status and the new line.
-    boost::signals2::signal<void(ReadStatus, std::string)> onUpdate;
+    std::function<void(ReadStatus, std::string)> onUpdate;
 
    private:
-    mutable std::mutex m_mutex;                   ///< Mutex to protect access to m_seenLines.
+    mutable std::mutex m_mutex;                   ///< Mutex to protect access to internal state.
     ReadStatus m_status = ReadStatus::Continue;   ///< Current read status.
     //std::unordered_set<std::string> m_seenLines;  ///< Set to track seen lines.
     std::hash<std::string> m_hash{};

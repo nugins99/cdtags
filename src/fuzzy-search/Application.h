@@ -54,7 +54,7 @@ class Application : public fzf::ModelInterface
     void finishSearch()
     {
         m_inputReader->setEndOfFile();  // Signal end of input
-        m_connection.disconnect();      // Disconnect from input updates
+        m_inputReader->disconnect();
     }
 
     /// @brief Get the currently selected result index.
@@ -109,7 +109,6 @@ class Application : public fzf::ModelInterface
     int m_selectedIndex{-1};                  ///< The index of the currently selected option.
     std::string m_selectedLine{};             ///< The currently selected line.
     std::vector<std::pair<std::string, int>> m_results;  ///< Vector of scored lines.
-    boost::signals2::scoped_connection m_connection;     ///< Connection for input reader updates.
 };
 
 #endif  // APPLICATION_H
