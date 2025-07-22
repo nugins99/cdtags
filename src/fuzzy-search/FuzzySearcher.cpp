@@ -5,6 +5,7 @@
 #include "FuzzySearcher.h"
 
 #include <vector>
+#include <algorithm>
 
 /// @namespace fzf
 /// @brief Namespace for fuzzy searching utilities.
