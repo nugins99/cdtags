@@ -3,6 +3,7 @@
 
 #include "TTY.h"
 
+#include <iostream>
 #include <unordered_set>
 
 #include "common/AnsiCodes.h"
@@ -22,18 +23,18 @@ void restore_terminal(int fd, const termios& original) { tcsetattr(fd, TCSAFLUSH
 
 /// @brief Saves the current console contents and switches to the alternate
 /// screen buffer.
-void saveConsoleContents(TTY& tty)
+void TTY::saveConsoleContents()
 {
-    tty.out() << "\033[?1049h";  // Switch to alternate screen buffer
-    tty.out().flush();
+    out() << "\033[?1049h";  // Switch to alternate screen buffer
+    out().flush();
 }
 
 /// @brief Restores the original console contents and switches back to the main
 /// screen buffer.
-void restoreConsoleContents(TTY& tty)
+void TTY::restoreConsoleContents()
 {
-    tty.out() << "\033[?1049l";  // Switch back to main screen buffer
-    tty.out().flush();
+    out() << "\033[?1049l";  // Switch back to main screen buffer
+    out().flush();
 }
 
 TTY::TTY() : m_fd(open("/dev/tty", O_RDWR))
@@ -49,13 +50,13 @@ TTY::TTY() : m_fd(open("/dev/tty", O_RDWR))
     // m_in.open(*m_tty_in);
     m_out.open(*m_tty_out);
 
-    saveConsoleContents(*this);
+    saveConsoleContents();
     set_raw_mode(m_fd, original);
 }
 
 TTY::~TTY()
 {
-    restoreConsoleContents(*this);
+    restoreConsoleContents();
 
     // Restore terminal settings
     restore_terminal(m_fd, original);
@@ -123,7 +124,8 @@ void TTY::updateProgress(size_t count)
           << "\n";
 }
 
-char TTY::getch() {
+char TTY::getch()
+{
     char c;
     if (read(m_fd, &c, 1) != 1)
     {
@@ -175,3 +177,5 @@ fzf::InputEvent TTY::getNextEvent()
     }
     return event;
 }
+
+void TTY::writeFinalResult(const std::string& result) { std::cout << result << "\n"; }

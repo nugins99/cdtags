@@ -19,7 +19,7 @@ Application::~Application()
     m_inputReader->stop();  // Ensure input reader is stopped
 }
 
-std::string_view Application::result() const
+const std::string & Application::result() const
 {
     if (m_selectedIndex == -1)
     {

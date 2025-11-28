@@ -10,7 +10,7 @@
 class MockModel : public fzf::ModelInterface
 {
    public:
-    std::string_view result() const override { return selected; }
+    const std::string & result() const override { return selected; }
     std::string searchString() const override { return search; }
     void setSearchString(std::string s) override { search = std::move(s); }
     int getSelectedIndex() const override { return index; }
@@ -42,6 +42,8 @@ class MockInput : public fzf::InputInterface
     /// @brief Update progress indicator.
     /// @param count Number of lines processed or spinner step.
     virtual void updateProgress(size_t ) override {};   
+
+    void writeFinalResult(const std::string& ) override {}
 
     std::string inputs;  ///< Character to return on next getch call
 };

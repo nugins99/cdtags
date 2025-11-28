@@ -16,7 +16,7 @@ class ModelInterface
     /// @brief Get the result at the specified index.
     /// @param index The index of the result to retrieve.
     /// @return The result string at the specified index.
-    virtual std::string_view result() const = 0;
+    virtual const std::string & result() const = 0;
 
     /// @brief Get the current search string.
     /// @return The current search string.

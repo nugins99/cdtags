@@ -10,6 +10,8 @@ add_library(fzf
 	AsyncReader.h
 	FuzzySearcher.h
 	InputReaderFactory.h
+	JSONRPCInterface.h
+	JSONRPCInterface.cpp
 	TTY.cpp)
 
 target_link_libraries(fzf Boost::program_options Boost::iostreams)

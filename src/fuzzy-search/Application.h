@@ -37,7 +37,7 @@ class Application : public fzf::ModelInterface
 
     /// @brief Get the currently selected result string.
     /// @return std::string The selected line, or the first result if none selected.
-    std::string_view result() const override;
+    const std::string & result() const override;
 
     /// @brief Get the current search string.
     std::string searchString() const override { return m_searchString; }

@@ -1,4 +1,10 @@
 #pragma once
+#include <cstdint>
+#include <string>
+#include <optional>
+#include <vector>
+
+#include <boost/property_tree/ptree.hpp>
 
 namespace fzf
 {
@@ -12,6 +18,15 @@ struct Result
     std::string line;
     bool selected{false};
     double score{0.0};
+    boost::property_tree::ptree toPropertyTree() const
+    {
+        boost::property_tree::ptree pt;
+        pt.put("index", static_cast<long long>(index));
+        pt.put("line", line);
+        pt.put("selected", selected);
+        pt.put("score", score);
+        return pt;
+    }
 };
 
 struct Results
@@ -20,6 +35,37 @@ struct Results
     std::vector<Result> results;
     std::size_t totalResults{0};
     std::pair<std::size_t, std::size_t> resultRange;
+
+    boost::property_tree::ptree toPropertyTree() const
+    {
+        boost::property_tree::ptree pt;
+        pt.put("searchString", searchString);
+        pt.put("totalResults", static_cast<long long>(totalResults));
+
+        // range as an array [first, second]
+        boost::property_tree::ptree rangeArray;
+        {
+            boost::property_tree::ptree item;
+            item.put("", static_cast<long long>(resultRange.first));
+            rangeArray.push_back(std::make_pair("", item));
+        }
+        {
+            boost::property_tree::ptree item;
+            item.put("", static_cast<long long>(resultRange.second));
+            rangeArray.push_back(std::make_pair("", item));
+        }
+        pt.add_child("range", rangeArray);
+
+        // results array
+        boost::property_tree::ptree resultsArray;
+        for (const auto& r : results)
+        {
+            resultsArray.push_back(std::make_pair(std::string(), r.toPropertyTree()));
+        }
+        pt.add_child("results", resultsArray);
+
+        return pt;
+    }
 };
 
 enum class InputType
@@ -57,5 +103,9 @@ class InputInterface
     /// @brief Update progress indicator.
     /// @param count Number of lines processed or spinner step.
     virtual void updateProgress(size_t count) = 0;
+
+    /// @brief Write final result
+    /// @param result The final result to write.
+    virtual void writeFinalResult(const std::string& result) = 0;
 };
 }  // namespace fzf
