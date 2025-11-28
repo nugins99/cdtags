@@ -7,8 +7,7 @@ struct Result
 {
     Result(std::size_t idx, const std::string& ln, bool sel, double sc)
         : index(idx), line(ln), selected(sel), score(sc)
-    {
-    }
+    {}
     std::size_t index{0};
     std::string line;
     bool selected{false};
@@ -37,7 +36,7 @@ struct InputEvent
 {
     InputType type{InputType::Unknown};
     std::optional<char> character;  // Valid only if type is PrintableChar
-    std::string searchString;      // Current search string after input
+    std::string searchString;       // Current search string after input
 };
 
 /// @class InputInterface
@@ -57,6 +56,6 @@ class InputInterface
 
     /// @brief Update progress indicator.
     /// @param count Number of lines processed or spinner step.
-    virtual void updateProgress(size_t count)  =0;   
+    virtual void updateProgress(size_t count) = 0;
 };
 }  // namespace fzf

@@ -1,15 +1,12 @@
 #include "Application.h"
 
-#include <common/AnsiCodes.h>
-
 #include <algorithm>
 #include <cassert>
-#include <format>
 #include <ranges>
 
 #include "FuzzySearcher.h"
 
-Application::Application(std::string& searchString, fzf::Reader::Ptr& inputReader, TTY& tty,
+Application::Application(std::string& searchString, fzf::Reader::Ptr& inputReader, fzf::InputInterface& tty,
                          std::size_t numResults)
     : m_tty(tty), m_searchString(searchString), m_inputReader(inputReader), m_numResults(numResults)
 {

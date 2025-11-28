@@ -1,15 +1,13 @@
 #ifndef FUZZY_APPLICATION_H
 #define FUZZY_APPLICATION_H
 
-#include <boost/signals2.hpp>
-#include <functional>
 #include <mutex>
 #include <string>
 #include <vector>
 
+#include "InputInterface.h"
 #include "ModelInterface.h"
 #include "Reader.h"
-#include "TTY.h"
 
 /// @class Application
 /// @brief Interactive fuzzy search application for terminal use.
@@ -30,8 +28,10 @@ class Application : public fzf::ModelInterface
     /// @brief Construct a new Application object.
     /// @param searchString Reference to the search string to use for fuzzy searching.
     /// @param inputReader Reference to the input reader function object.
+    /// @param tty Reference to the TTY object for terminal interaction.
     /// @param numResults The number of results to return/display.
-    Application(std::string& searchString, fzf::Reader::Ptr& inputReader, TTY & tty, std::size_t numResults);
+    Application(std::string& searchString, fzf::Reader::Ptr& inputReader, fzf::InputInterface& tty,
+                std::size_t numResults);
     /// @brief Destructor. Ensures input reader is stopped.
     ~Application();
 
@@ -101,13 +101,13 @@ class Application : public fzf::ModelInterface
     /// @brief Update the selected line index based on current results.
     void updateSelectedLineIndex();
 
-    TTY & m_tty;                                ///< TTY object for terminal interaction.
-    std::mutex m_searchMutex;                 ///< Mutex for search operations.
-    std::string& m_searchString;              ///< The search string to use for fuzzy searching.
-    fzf::Reader::Ptr& m_inputReader;          ///< The input reader function object.
-    int m_numResults;                         ///< The number of results to return.
-    int m_selectedIndex{-1};                  ///< The index of the currently selected option.
-    std::string m_selectedLine{};             ///< The currently selected line.
+    fzf::InputInterface& m_tty;       ///< TTY object for terminal interaction.
+    std::mutex m_searchMutex;         ///< Mutex for search operations.
+    std::string& m_searchString;      ///< The search string to use for fuzzy searching.
+    fzf::Reader::Ptr& m_inputReader;  ///< The input reader function object.
+    int m_numResults;                 ///< The number of results to return.
+    int m_selectedIndex{-1};          ///< The index of the currently selected option.
+    std::string m_selectedLine{};     ///< The currently selected line.
     std::vector<std::pair<std::string, int>> m_results;  ///< Vector of scored lines.
 };
 
