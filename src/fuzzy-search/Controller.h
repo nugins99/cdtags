@@ -38,48 +38,29 @@ class Controller
    private:
     void processInput()
     {
-        // Read user input and process it
-        char c;
-        c = m_tty.getch();
-
-        if (c == '\033')  // Escape sequence
+        auto event = m_tty.getNextEvent();
+        switch (event.type)
         {
-            // Handle escape sequences for special keys
-            c = m_tty.getch();
-            if (c == '[')
-            {
-                c = m_tty.getch();
-                switch (c)
+            case InputType::UpArrow:
+                onUpArrow();
+                break;
+            case InputType::DownArrow:
+                onDownArrow();
+                break;
+            case InputType::Backspace:
+                onBackspace();
+                break;
+            case InputType::PrintableChar:
+                if (event.character.has_value())
                 {
-                    case 'A':
-                        onUpArrow();
-                        break;  // Up arrow
-                    case 'B':
-                        onDownArrow();
-                        break;  // Down arrow
-                    case 'C':   /* Right arrow */
-                        break;
-                    case 'D': /* Left arrow */
-                        break;
+                    onPrintableChar(event.character.value());
                 }
-            }
-        }
-        else if (c == '\n' || c == '\r')
-        {
-            m_stop = true;  // Stop the loop
-        }
-        else if (c == 127)  // Backspace
-        {
-            std::string searchString = m_model.searchString();
-            if (!searchString.empty())
-            {
-                searchString.pop_back();
-                m_model.setSearchString(searchString);
-            }
-        }
-        else if (isprint(c))
-        {
-            onPrintableChar(c);  // Handle printable characters
+                break;
+            case InputType::Newline:
+                m_stop = true;
+                break;
+            default:
+                break;
         }
     }
 

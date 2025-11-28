@@ -31,13 +31,7 @@ std::string_view Application::result() const
     return m_selectedLine;  // Return empty string if no selection
 }
 
-void Application::updateSpinner(size_t count)
-{
-    static constexpr std::string_view spinner = "|/-\\";
-    const auto spinnerValue = spinner[count % spinner.size()];
-    m_tty.out() << ansi::fg::yellow << std::format("{} Updating...", spinnerValue)
-                << ansi::text::normal << "\n";
-}
+void Application::updateSpinner(size_t count) { m_tty.updateProgress(count); }
 
 void Application::onUpdate(fzf::Reader::ReadStatus status, const std::string& line)
 {
@@ -51,8 +45,6 @@ void Application::onUpdate(fzf::Reader::ReadStatus status, const std::string& li
 void Application::updateDisplay()
 {
     std::scoped_lock lock(m_searchMutex);
-    // Clear screen and display options
-    m_tty.clear();
 
     int localSelectedIndex = m_selectedIndex;  // Local copy for thread safety
     if (m_selectedIndex == -1)
@@ -82,9 +74,11 @@ void Application::updateDisplay()
     // Stop index is the minimum of the last entry index and the start index plus the number of
     // results
     size_t stop = std::min(lastEntryIndex, int(start + m_numResults));
-    m_tty.out() << "Showing num lines: " << m_numResults << "\n";
-    m_tty.out() << std::format("{} - {} of {} results\n", start, stop, lastEntryIndex);
 
+    fzf::Results displayResults;
+    displayResults.searchString = m_searchString;
+    displayResults.totalResults = lastEntryIndex;
+    displayResults.resultRange = {start, stop};
     for (size_t i = start; i < stop; ++i)
     {
         // Check if the score is zero or less
@@ -94,30 +88,16 @@ void Application::updateDisplay()
             // Since this list is sorted, we can break early
             // break;
         }
-        m_tty.out() << ansi::fg::green << i << ansi::text::normal;
+
+        displayResults.results.push_back(fzf::Result(i, m_results[i].first,
+                                                     (static_cast<int>(i) == localSelectedIndex),
+                                                     m_results[i].second));
         if (static_cast<int>(i) == localSelectedIndex)
         {
-            // Highlight selected option with reverse video
-            m_tty.out() << ansi::text::inverse;
-            m_tty.out() << "> " << TTY::boldMatching(m_results[i].first, m_searchString);
-            m_tty.out() << std::format(" {}({}){}\n", ansi::fg::gray, m_results[i].second,
-                                       ansi::text::normal);
             m_selectedLine = m_results[i].first;  // Update selected line
         }
-        else
-        {
-            m_tty.out() << "  " << TTY::boldMatching(m_results[i].first, m_searchString);
-            m_tty.out() << std::format(" {}({}){}\n", ansi::fg::gray, m_results[i].second,
-                                       ansi::text::normal);
-        }
     }
-    if (m_inputReader->status() == fzf::Reader::ReadStatus::Continue)
-    {
-        updateSpinner(m_results.size());
-    }
-    // Display current search string
-    m_tty.out() << ansi::fg::red << "> " << ansi::text::normal << m_searchString;
-    m_tty.out().flush();
+    m_tty.writeResults(displayResults);
 }
 
 bool resultCompare(const std::pair<std::string, int>& a, const std::pair<std::string, int>& b)

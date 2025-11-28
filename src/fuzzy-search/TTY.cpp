@@ -2,7 +2,9 @@
 /// @brief Implementation of the TTY class.
 
 #include "TTY.h"
+
 #include <unordered_set>
+
 #include "common/AnsiCodes.h"
 
 // Set terminal to raw mode to read keypresses
@@ -81,4 +83,95 @@ std::string TTY::boldMatching(const std::string& text, const std::string& chars_
         }
     }
     return result;
+}
+
+void TTY::writeResults(const fzf::Results& results)
+{
+    clear();
+    out() << std::format("{} - {} of {} results\n", results.resultRange.first,
+                         results.resultRange.second, results.results.size());
+    out() << "Search String: " << results.searchString << "\n";
+    out() << "Total Results: " << results.totalResults << "\n";
+    for (const auto& result : results.results)
+    {
+        // Prefix each line with its index in green
+        out() << ansi::fg::green << result.index << ansi::text::normal;
+        if (result.selected)
+        {
+            // Highlight selected option with reverse video
+            out() << ansi::text::inverse;
+            out() << "> " << TTY::boldMatching(result.line, results.searchString);
+        }
+        else
+        {
+            out() << "  " << TTY::boldMatching(result.line, results.searchString);
+        }
+        // Append score in gray
+        out() << std::format(" {}({}){}\n", ansi::fg::gray, result.score, ansi::text::normal);
+    }
+    updateProgress(results.results.size());
+    // Display current search string
+    out() << ansi::fg::red << "> " << ansi::text::normal << results.searchString;
+    out().flush();
+}
+
+void TTY::updateProgress(size_t count)
+{
+    static constexpr std::string_view spinner = "|/-\\";
+    const auto spinnerValue = spinner[count % spinner.size()];
+    out() << ansi::fg::yellow << std::format("{} Updating...", spinnerValue) << ansi::text::normal
+          << "\n";
+}
+
+char TTY::getch() {
+    char c;
+    if (read(m_fd, &c, 1) != 1)
+    {
+        throw std::runtime_error("Failed to read from TTY");
+    }
+    return c;
+}
+
+fzf::InputEvent TTY::getNextEvent()
+{
+    fzf::InputEvent event;
+    // Read user input and process it
+    char c = getch();
+
+    if (c == '\033')  // Escape sequence
+    {
+        // Handle escape sequences for special keys
+        c = getch();
+        if (c == '[')
+        {
+            c = getch();
+            switch (c)
+            {
+                case 'A':
+                    event.type = fzf::InputType::UpArrow;
+                    break;  // Up arrow
+                case 'B':
+                    event.type = fzf::InputType::DownArrow;
+                    break;  // Down arrow
+                default:    // All other escape sequences
+                    event.type = fzf::InputType::Unknown;
+            }
+        }
+    }
+    else if (c == '\n' || c == '\r')
+    {
+        event.type = fzf::InputType::Newline;
+    }
+    else if (c == 127)  // Backspace
+    {
+        m_searchString.pop_back();
+        event.type = fzf::InputType::Backspace;
+        event.searchString = m_searchString;
+    }
+    else if (isprint(c))
+    {
+        event.type = fzf::InputType::PrintableChar;
+        event.character = c;
+    }
+    return event;
 }

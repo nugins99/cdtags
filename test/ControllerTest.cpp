@@ -26,12 +26,22 @@ class MockModel : public fzf::ModelInterface
 class MockInput : public fzf::InputInterface
 {
    public:
-    virtual char getch()
+
+    virtual fzf::InputEvent getNextEvent() override
     {
-        char c = inputs.front();
+        fzf::InputEvent event;
+        event.type = fzf::InputType::PrintableChar;
+        event.character = inputs.front();
         inputs.erase(0, 1);  // Remove the first character
-        return c;
+        return event;
     }
+   /// Write results to the output.
+    /// @param results The results to write.
+    virtual void writeResults(const fzf::Results& ) override {};
+
+    /// @brief Update progress indicator.
+    /// @param count Number of lines processed or spinner step.
+    virtual void updateProgress(size_t ) override {};   
 
     std::string inputs;  ///< Character to return on next getch call
 };
@@ -45,6 +55,7 @@ TEST(ControllerTest, HandlesUpAndDownArrow)
     model.resultsSize = 3;
     model.setSelectedIndex(1);
     controller.run();
+    // TODO - add test to verify the inital down arrow bypasses "0"
 
     EXPECT_EQ(model.getSelectedIndex(), 1);
     EXPECT_EQ(model.selectedIndices.size(), 3);  // Check if both up and down were processed

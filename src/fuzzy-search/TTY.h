@@ -44,18 +44,10 @@ class TTY : public fzf::InputInterface
     /// @return std::ostream& Reference to the output stream.
     std::ostream& out();
 
-    /// @brief Read a single character from the terminal (blocking).
-    /// @throws std::runtime_error if reading fails.
-    /// @return char The character read.
-    char getch() override
-    {
-        char c;
-        if (read(m_fd, &c, 1) != 1)
-        {
-            throw std::runtime_error("Failed to read from TTY");
-        }
-        return c;
-    }
+    
+
+    /// @brief Get next event
+    virtual fzf::InputEvent getNextEvent() override; 
 
     /// @brief Clear the terminal screen.
     void clear()
@@ -69,7 +61,19 @@ class TTY : public fzf::InputInterface
     /// @return std::string The processed string with bolded characters.
     static std::string boldMatching(const std::string& text, const std::string& chars_to_bold);
 
+    /// Write results to the output.
+    /// @param results The results to write.
+    void writeResults(const fzf::Results& results) override;
+
+    virtual void updateProgress(size_t count)  override;
+
    private:
+
+    /// @brief Read a single character from the terminal (blocking).
+    /// @throws std::runtime_error if reading fails.
+    /// @return char The character read.
+    char getch();
+
     int m_fd;  ///< File descriptor for /dev/tty
     // std::unique_ptr<io::file_descriptor_source> m_tty_in;
     std::unique_ptr<io::file_descriptor_sink> m_tty_out;
@@ -77,6 +81,7 @@ class TTY : public fzf::InputInterface
     io::stream<io::file_descriptor_sink> m_out;
 
     termios original;  ///< Original terminal settings
+    std::string m_searchString;
 };
 
 #endif  // TTY_H
