@@ -75,6 +75,7 @@ enum class InputType
     Backspace,
     PrintableChar,
     Newline,
+    SearchString,
     Unknown
 };
 

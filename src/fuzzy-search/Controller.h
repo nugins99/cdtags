@@ -51,10 +51,7 @@ class Controller
                 onBackspace();
                 break;
             case InputType::PrintableChar:
-                if (event.character.has_value())
-                {
-                    onPrintableChar(event.character.value());
-                }
+                m_model.setSearchString(event.searchString);
                 break;
             case InputType::Newline:
                 m_stop = true;
@@ -95,13 +92,6 @@ class Controller
             searchString.pop_back();
             m_model.setSearchString(searchString);
         }
-    }
-
-    void onPrintableChar(char c)
-    {
-        std::string searchString = m_model.searchString();
-        searchString += c;
-        m_model.setSearchString(searchString);
     }
 
     InputInterface& m_tty;    ///< Input stream for reading data

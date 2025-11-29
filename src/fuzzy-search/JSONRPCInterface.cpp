@@ -73,6 +73,13 @@ InputEvent JSONRPCInterface::getNextEvent()
     {
         event.type = InputType::Newline;
     }
+    else if (type == "SearchString")
+    {
+        std::string searchStr = getString("searchString");
+        m_searchString = searchStr;
+        event.type = InputType::SearchString;
+        event.searchString = m_searchString;
+    }
     else if (type == "PrintableChar")
     {
         std::string ch = getString("character");
