@@ -27,8 +27,8 @@ po::variables_map parseCommandLineOptions(int argc, char* argv[])
         ("search,s", po::value<std::string>()->default_value(""), "Search string")
         ("readline_line", po::value<std::string>(), "")
         ("file,f", po::value<std::string>(), "File path")("stdin", "Read input from standard input")
-        ("files,F", "File listing, recursive from current directory")
-        ("directories,D", "Directory listing, recursive from current directory")
+        ("files,F", po::value<std::filesystem::path>()->default_value(std::filesystem::current_path()), "File listing, recursive from current directory")
+        ("directories,D",po::value<std::filesystem::path>()->default_value(std::filesystem::current_path()), "Directory listing, recursive from current directory")
         ("results,r", po::value<int>()->default_value(10), "Number of possible results")
         ("jsonrpc,j", "Use JSON-RPC for input/output");
     // clang-format on
@@ -46,7 +46,8 @@ po::variables_map parseCommandLineOptions(int argc, char* argv[])
     if (!vm.count("search") ||
         (!vm.count("file") && !vm.count("stdin") && !vm.count("files") && !vm.count("directories")))
     {
-        std::cerr << "Error: Missing required options --search and either --file or --stdin"
+        std::cerr << "Error: Missing required options --search and one of --file or --stdin or "
+                     "--files or --directories."
                   << std::endl;
         std::cout << desc << std::endl;
         exit(1);

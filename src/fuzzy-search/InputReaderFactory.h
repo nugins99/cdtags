@@ -25,11 +25,13 @@ inline Reader::Ptr createInputReader(const po::variables_map& vm,
     }
     else if (vm.count("directories"))
     {
-        return std::make_unique<FileListReader>(std::filesystem::current_path(), FileListReader::SearchType::Directories);
+        auto path = vm["files"].as<std::filesystem::path>();   
+        return std::make_unique<FileListReader>(path, FileListReader::SearchType::Directories);
     }
     else if (vm.count("files"))
     {
-        return std::make_unique<FileListReader>(std::filesystem::current_path(), FileListReader::SearchType::Files);
+        auto path = vm["files"].as<std::filesystem::path>();   
+        return std::make_unique<FileListReader>(path, FileListReader::SearchType::Files);
     }
     else
     {
