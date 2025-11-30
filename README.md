@@ -32,7 +32,7 @@ environments.  C++ & boost is generally available in most Linux environments.
 I wrote this mostly out of curiousity, but also to have a fzf-like tool on an
 environment where the toolchain needed by fzf is not available.  The core
 scoring algorithm are AI generated implementations of well-known algorithms. A
-bulk of the dcode for this is just input/output processing needed to make a
+bulk of the code for this is just input/output processing needed to make a
 responsive application able to handle signifiant volumes of data that is
 streamed in.
 
