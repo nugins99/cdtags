@@ -2,16 +2,17 @@
 
 let s:fz_job = 0
 let s:results_buf = -1
-let s:fz_jsonrpc = 0
 let s:option_prefix = '- '
+let s:results = 10
 
 function! FuzzyFiles() abort
   " Create top mini input buffer
-  new 
+  botright new
+  resize 12
   let s:prompt_buf = bufnr('%')
   setlocal buftype=prompt
-  "setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile
-  "setlocal noma nowrap
+  setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile
+  setlocal nonumber norelativenumber
 
   " Autocmd to send input on every keystroke
   augroup FuzzyFiles
@@ -43,15 +44,11 @@ function! s:start_fz_job() abort
   endif
 
   if executable('fuzzy-search')
-    let s:fz_jsonrpc = 1
     " Ask `fuzzy-search` to list files recursively from repository root
-    let cmd = ['fuzzy-search', '--files', '--search-root=' . l:start_dir, '--jsonrpc']
-  else
-    let s:fz_jsonrpc = 0
-    " Fallback: user-specified tool that accepts a line and outputs matches
-    let cmd = ['fuzzy-search', l:start_dir]   " <-- user can change to fzf/fzy/etc.
+    let cmd = ['fuzzy-search', '--files', '--search-root=' . l:start_dir, '--jsonrpc', '--results=' . s:results, '--reverse']
+  else 
+    echom "Error: 'fuzzy-search' executable not found in PATH."
   endif
-
   let s:fz_job = job_start(cmd, {
         \ 'out_cb': function('s:on_stdout'),
         \ 'err_cb': function('s:on_stderr'),
@@ -127,6 +124,8 @@ function! s:on_stdout(job, data) abort
     else
       echom "Malformed results params: " . string(params)
     endif
+  elseif type(msg) == type({}) && has_key(msg, 'method') && msg['method'] ==# 'finalResult' && has_key(msg, 'params')
+    " Final result received; can exit the job now.
   else
     echom "Unknown JSON-RPC message: " . string(msg)
   endif
@@ -139,21 +138,17 @@ function! s:send_query()
   if l:status !=? 'run' 
     return
   endif
-
   let line = s:current_search_string()
-
-  if s:fz_jsonrpc
-    let payload = {'jsonrpc': '2.0', 'method': 'input', 'params': {'type': 'SearchString', 'searchString': line}}
-    call ch_sendraw(s:fz_channel, json_encode(payload) . "\n")
-  else
-    call ch_sendraw(s:fz_channel, line . "\n")
-  endif
+  let payload = {'jsonrpc': '2.0', 'method': 'input', 'params': {'type': 'SearchString', 'searchString': line}}
+  call ch_sendraw(s:fz_channel, json_encode(payload) . "\n")
 endfunction
 
 " --- Handle job exit --------------------------------------------------------
-function! s:on_exit(channel) abort
-  echom "Fuzzy search job exited"
+function! s:on_exit(channel, exit_status) abort
   " silent cleanup OK
+  unlet s:fz_job
+  unlet s:fz_channel
+  unlet g:search_match_id
 endfunction
 
 " --- When user hits <Enter> in results buffer -------------------------------
@@ -163,23 +158,15 @@ function! s:open_selected() abort
   let file = substitute(file, '^' . escape(s:option_prefix, '\'), '', '')
   " If the fuzzy backend is running, send the accept/submit input
   " so it can emit its finalResult and exit, then wait for it to finish.
-  if exists('s:fz_job') && type(s:fz_job) == type(0) && s:fz_job > 0 && job_status(s:fz_job) ==# 'run'
-    if exists('s:fz_channel') && s:fz_channel != 0
-      if s:fz_jsonrpc
-        let payload = {'jsonrpc': '2.0', 'method': 'input', 'params': {'type': 'Newline'}}
-        call ch_sendraw(s:fz_channel, json_encode(payload) . "\n")
-      else
-        " Line-based backends accept a terminating newline to select.
-        call ch_sendraw(s:fz_channel, "\n")
-      endif
+  let l:status = job_status(s:fz_job)
+  if l:status ==# 'run'
+    if exists('s:fz_channel')
+      let payload = {'jsonrpc': '2.0', 'method': 'input', 'params': {'type': 'Newline'}}
+      call ch_sendraw(s:fz_channel, json_encode(payload) . "\n")
     endif
-
-    " Wait for the job to exit; poll briefly to avoid busy-looping.
-    while job_status(s:fz_job) ==# 'run'
-      sleep 10m
-    endwhile
   endif
 
+  unlet g:search_match_id
   quit!
 
   if filereadable(file)
