@@ -127,6 +127,46 @@ find . -type d | fuzzy-search --stdin
 
 ---
 
+## Vim plugin
+
+A lightweight Vim/Neovim plugin is included at `plugin/fuzzy.vim`. It provides
+an in-editor fuzzy file picker that integrates with the `fuzzy-search` backend
+used by this project.
+
+Installation:
+
+- Copy `plugin/fuzzy.vim` into your Vim runtimepath (for example `~/.vim/plugin/`) or
+  add this repository with your plugin manager so the `plugin/` directory is
+  loaded.
+- For Neovim, place it under `~/.config/nvim/plugin/` or load the repo with your
+  preferred plugin manager.
+
+Usage:
+
+- Run `:FuzzyFiles` in Vim/Neovim to open the fuzzy picker. A small prompt
+  buffer appears at the top; typing there sends the current query to the
+  backend in real time and results are shown below.
+- Press <Enter> on a highlighted result to open the file.
+
+Customization and notes:
+
+- Matched characters are emphasized using the `FuzzyMatch` highlight group
+  (default: bold yellow). You can customize it, for example:
+
+```vim
+:highlight FuzzyMatch guifg=#FFD700 gui=bold
+```
+
+- Example mapping to open the picker quickly:
+
+```vim
+nnoremap <leader>f :FuzzyFiles<CR>
+```
+
+- The plugin uses `TextChanged`/`TextChangedI` autocmds to send queries on
+  every keystroke. If you need to reduce backend load, modify the plugin to
+  debounce or throttle queries.
+
 ## Advanced
 - You can customize fuzzy-search keybindings in `fuzzy-search-activate.sh`.
 
