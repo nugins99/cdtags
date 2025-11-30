@@ -51,6 +51,7 @@ class Controller
                 onBackspace();
                 break;
             case InputType::PrintableChar:
+            case InputType::SearchString:
                 m_model.setSearchString(event.searchString);
                 break;
             case InputType::Newline:

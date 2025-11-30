@@ -19,19 +19,20 @@ namespace po = boost::program_options;
 inline Reader::Ptr createInputReader(const po::variables_map& vm,
                                      [[maybe_unused]] boost::asio::io_context& ioContext)
 {
+    // This value is always set because of the default_value in option definition.
+    auto searchRoot = vm["search-root"].as<std::string>();
+
     if (vm.count("stdin"))
     {
         return std::make_unique<StdinReader>();
     }
     else if (vm.count("directories"))
     {
-        auto path = vm["files"].as<std::filesystem::path>();   
-        return std::make_unique<FileListReader>(path, FileListReader::SearchType::Directories);
+        return std::make_unique<FileListReader>(searchRoot, FileListReader::SearchType::Directories);
     }
     else if (vm.count("files"))
     {
-        auto path = vm["files"].as<std::filesystem::path>();   
-        return std::make_unique<FileListReader>(path, FileListReader::SearchType::Files);
+        return std::make_unique<FileListReader>(searchRoot, FileListReader::SearchType::Files);
     }
     else
     {

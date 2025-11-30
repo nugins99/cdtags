@@ -23,12 +23,15 @@ po::variables_map parseCommandLineOptions(int argc, char* argv[])
 {
     po::options_description desc("Allowed options");
     // clang-format off
+    // NOTE:  --files and --directories are mutually exclusive and specifying a default value for both can lead to ambiguity.
+    // The search-root option is used as the base path for both file and directory searches.
     desc.add_options()("help,h", "Display help message")
         ("search,s", po::value<std::string>()->default_value(""), "Search string")
         ("readline_line", po::value<std::string>(), "")
         ("file,f", po::value<std::string>(), "File path")("stdin", "Read input from standard input")
-        ("files,F", po::value<std::filesystem::path>()->default_value(std::filesystem::current_path()), "File listing, recursive from current directory")
-        ("directories,D",po::value<std::filesystem::path>()->default_value(std::filesystem::current_path()), "Directory listing, recursive from current directory")
+        ("files,F",  "File listing, recursive from search root")
+        ("directories,D", "Directory listing, recursive from the search root")
+        ("search-root", po::value<std::string>()->default_value("."), "Root path for file/directory search")
         ("results,r", po::value<int>()->default_value(10), "Number of possible results")
         ("jsonrpc,j", "Use JSON-RPC for input/output");
     // clang-format on
