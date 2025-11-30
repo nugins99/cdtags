@@ -5,13 +5,10 @@ let s:results_buf = -1
 let s:fz_jsonrpc = 0
 let s:option_prefix = '- '
 
-" --- Open the 2-window UI ---------------------------------------------------
-
 function! FuzzyFiles() abort
   " Create top mini input buffer
   new 
   let s:prompt_buf = bufnr('%')
-  echom "Prompt buffer: " . s:prompt_buf
   setlocal buftype=prompt
   "setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile
   "setlocal noma nowrap
@@ -32,7 +29,6 @@ function! FuzzyFiles() abort
 endfunction
 
 " --- Start fuzzy backend job ------------------------------------------------
-
 function! s:start_fz_job() abort
   " Prefer using the repository's `fuzzy-search` JSON-RPC aware binary when
   " available. Fall back to a simple line-based tool if not.
@@ -45,7 +41,6 @@ function! s:start_fz_job() abort
       let l:start_dir = l:git_root[0]
     endif
   endif
-  echom "Starting fuzzy search in directory: " . l:start_dir
 
   if executable('fuzzy-search')
     let s:fz_jsonrpc = 1
@@ -65,12 +60,40 @@ function! s:start_fz_job() abort
   let s:fz_channel = job_getchannel(s:fz_job)
 endfunction
 
-" --- Update selection window as job outputs lines ---------------------------
-function! s:on_stderr(job, data) abort
-  " For now, ignore stderr output
-  echom "Fuzzy search stderr: " . a:data 
+" --- Highlight matched characters in results buffer -------------------------
+function! s:highlight_search_chars(searchString) abort
+  " Create a highlight group for matched characters (bold / colored).
+  if !hlexists('SearchChars')
+    "execute 'highlight SearchChars cterm=bold ctermfg=Red gui=bold guifg=Red'
+    execute 'highlight SearchChars gui=bold guifg=Yellow cterm=bold ctermfg=Yellow'
+  endif
+  " Clear any previous match highlights
+  if exists('g:search_match_id')
+    call matchdelete(g:search_match_id)
+  endif
+
+  let class = escape(a:searchString, '^-]\')
+  let g:search_match_id = matchadd('SearchChars', '\v[' . class . ']')
 endfunction
 
+" --- Get current search string from prompt buffer ---------------------------
+function! s:current_search_string() abort
+  let l:search = ''
+  if exists('s:prompt_buf') && bufloaded(s:prompt_buf)
+    let l:prompt_line= getbufoneline(s:prompt_buf, '$')
+    let l:prompt = prompt_getprompt(s:prompt_buf)
+    let l:search = substitute(l:prompt_line, '^' . escape(l:prompt, '\'), '', '')
+  endif
+  return l:search
+endfunction
+
+" --- Handle stderr output from backend tool -------------------------------
+function! s:on_stderr(job, data) abort
+  " For now, ignore stderr output
+  " echom "Fuzzy search stderr: " . a:data 
+endfunction
+
+" --- Update selection window as job outputs lines ---------------------------
 function! s:on_stdout(job, data) abort
   " Clear the prompt buffer except for the final line (the user's input).
   if exists('s:prompt_buf') && bufloaded(s:prompt_buf)
@@ -86,7 +109,11 @@ function! s:on_stdout(job, data) abort
   endif
 
   let msg = json_decode(a:data)
+  
+  let l:search = s:current_search_string()
+  call s:highlight_search_chars(l:search)
 
+  
   if type(msg) == type({}) && has_key(msg, 'method') && msg['method'] ==# 'results' && has_key(msg, 'params')
     let params = msg['params']
     if type(params) == type({}) && has_key(params, 'results')
@@ -107,19 +134,13 @@ function! s:on_stdout(job, data) abort
 endfunction
 
 " --- Send query to backend tool --------------------------------------------
-
 function! s:send_query() 
   let l:status = job_status(s:fz_job)
   if l:status !=? 'run' 
     return
   endif
 
-  let l:current_line = line('.')
-  let line = getline(l:current_line)
-  let prompt = prompt_getprompt(s:prompt_buf)
-  let line = substitute(line, '^' . escape(prompt, '\'), '', '')
-
-  echom "Sending query: " . line
+  let line = s:current_search_string()
 
   if s:fz_jsonrpc
     let payload = {'jsonrpc': '2.0', 'method': 'input', 'params': {'type': 'SearchString', 'searchString': line}}
@@ -129,13 +150,13 @@ function! s:send_query()
   endif
 endfunction
 
+" --- Handle job exit --------------------------------------------------------
 function! s:on_exit(channel) abort
   echom "Fuzzy search job exited"
   " silent cleanup OK
 endfunction
 
 " --- When user hits <Enter> in results buffer -------------------------------
-
 function! s:open_selected() abort
   let lnum = line('.')
   let file = getline(lnum)
@@ -168,6 +189,7 @@ function! s:open_selected() abort
   endif
 endfunction
 
-comman! FuzzyFiles call FuzzyFiles()
+command! FuzzyFiles call FuzzyFiles()
+nn <silent> <c-p> :FuzzyFiles<cr>
 " ============================================================================
 
