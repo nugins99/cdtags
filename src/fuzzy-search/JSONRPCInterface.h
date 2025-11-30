@@ -27,7 +27,7 @@ class JSONRPCInterface : public InputInterface
 {
   public:
     /// Construct with input and output streams (not owned).
-    explicit JSONRPCInterface(std::istream& in, std::ostream& out);
+    explicit JSONRPCInterface(std::istream& in, std::ostream& out, bool reverse);
     ~JSONRPCInterface() override = default;
 
     JSONRPCInterface(const JSONRPCInterface&) = delete;
@@ -42,6 +42,7 @@ class JSONRPCInterface : public InputInterface
     std::istream& m_in;
     std::ostream& m_out;
     std::string m_searchString{};
+    bool m_reverse;
 };
 
 }  // namespace fzf

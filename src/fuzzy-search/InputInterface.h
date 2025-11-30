@@ -1,10 +1,10 @@
 #pragma once
-#include <cstdint>
-#include <string>
-#include <optional>
-#include <vector>
-
 #include <boost/property_tree/ptree.hpp>
+#include <cstdint>
+#include <optional>
+#include <ranges>
+#include <string>
+#include <vector>
 
 namespace fzf
 {
@@ -36,7 +36,7 @@ struct Results
     std::size_t totalResults{0};
     std::pair<std::size_t, std::size_t> resultRange;
 
-    boost::property_tree::ptree toPropertyTree() const
+    boost::property_tree::ptree toPropertyTree(bool reverse) const
     {
         boost::property_tree::ptree pt;
         pt.put("searchString", searchString);
@@ -58,9 +58,20 @@ struct Results
 
         // results array
         boost::property_tree::ptree resultsArray;
-        for (const auto& r : results)
+
+        if (reverse)
         {
-            resultsArray.push_back(std::make_pair(std::string(), r.toPropertyTree()));
+            for (const auto& r : std::ranges::reverse_view(results))
+            {
+                resultsArray.push_back(std::make_pair(std::string(), r.toPropertyTree()));
+            }
+        }
+        else
+        {
+            for (const auto& r : results)
+            {
+                resultsArray.push_back(std::make_pair(std::string(), r.toPropertyTree()));
+            }
         }
         pt.add_child("results", resultsArray);
 

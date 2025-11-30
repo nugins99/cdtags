@@ -10,7 +10,7 @@
 
 namespace fzf
 {
-JSONRPCInterface::JSONRPCInterface(std::istream& in, std::ostream& out) : m_in(in), m_out(out) {}
+JSONRPCInterface::JSONRPCInterface(std::istream& in, std::ostream& out, bool reverse) : m_in(in), m_out(out), m_reverse(reverse) {}
 
 InputEvent JSONRPCInterface::getNextEvent()
 {
@@ -114,7 +114,7 @@ void JSONRPCInterface::writeResults(const Results& results)
     boost::property_tree::ptree root;
     root.put("jsonrpc", "2.0");
     root.put("method", "results");
-    root.add_child("params", results.toPropertyTree());
+    root.add_child("params", results.toPropertyTree(m_reverse));
     // write_json will pretty-print by default; pass false to avoid extra indentation
     boost::property_tree::write_json(m_out, root, false);
     m_out.flush();

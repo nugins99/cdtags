@@ -32,6 +32,7 @@ po::variables_map parseCommandLineOptions(int argc, char* argv[])
         ("files,F",  "File listing, recursive from search root")
         ("directories,D", "Directory listing, recursive from the search root")
         ("search-root", po::value<std::string>()->default_value("."), "Root path for file/directory search")
+        ("reverse,R", "Reverse the sorting order of results")
         ("results,r", po::value<int>()->default_value(10), "Number of possible results")
         ("jsonrpc,j", "Use JSON-RPC for input/output");
     // clang-format on
@@ -63,7 +64,8 @@ std::unique_ptr<fzf::InputInterface> createInputInterface(const po::variables_ma
 {
     if (vm.count("jsonrpc"))
     {
-        return std::make_unique<fzf::JSONRPCInterface>(std::cin, std::cout);
+        bool reverseOrder = vm.count("reverse") > 0;
+        return std::make_unique<fzf::JSONRPCInterface>(std::cin, std::cout, reverseOrder);
     }
     else
     {
