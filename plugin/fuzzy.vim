@@ -43,6 +43,11 @@ function! s:start_fz_job() abort
     endif
   endif
 
+  " Save the search root so other functions can compute relative vs absolute
+  let s:search_root = l:start_dir
+  " Map of displayed result line number -> full path
+  let s:results_map = {}
+
   if executable('fuzzy-search')
     " Ask `fuzzy-search` to list files recursively from repository root
     let cmd = ['fuzzy-search', '--files', '--search-root=' . l:start_dir, '--jsonrpc', '--results=' . s:results, '--reverse']
@@ -50,9 +55,9 @@ function! s:start_fz_job() abort
     echom "Error: 'fuzzy-search' executable not found in PATH."
   endif
   let s:fz_job = job_start(cmd, {
-        \ 'out_cb': function('s:on_stdout'),
-        \ 'err_cb': function('s:on_stderr'),
-        \ 'exit_cb':   function('s:on_exit'),
+        \ 'out_cb': 's:on_stdout',
+        \ 'err_cb': 's:on_stderr',
+        \ 'exit_cb':'s:on_exit',
         \ })
   let s:fz_channel = job_getchannel(s:fz_job)
 endfunction
@@ -114,13 +119,24 @@ function! s:on_stdout(job, data) abort
   if type(msg) == type({}) && has_key(msg, 'method') && msg['method'] ==# 'results' && has_key(msg, 'params')
     let params = msg['params']
     if type(params) == type({}) && has_key(params, 'results')
-      for r in params['results']
-        if type(r) == type({}) && has_key(r, 'line')
-          let l:lastLine = line('$')
-          let l:text = r['line']
-          call append(l:lastLine  - 1, s:option_prefix .. l:text)
-        endif
-      endfor
+        for r in params['results']
+          if type(r) == type({}) && has_key(r, 'line')
+            let l:lastLine = line('$')
+            let l:orig = r['line']
+            " Compute absolute path for the result.
+            if len(l:orig) > 0 && l:orig[0] !=# '/'
+              let l:full = fnamemodify(s:search_root . '/' . l:orig, ':p')
+            else
+              let l:full = fnamemodify(l:orig, ':p')
+            endif
+            " Compute display path relative to the search root.
+            let l:display = substitute(l:full, '^' . escape(s:search_root . '/', '\'), '', '')
+            call append(l:lastLine  - 1, s:option_prefix .. l:display)
+            " Record mapping from the buffer line number to full path.
+            let l:newln = line('$')
+            let s:results_map[l:newln] = l:full
+          endif
+        endfor
     else
       echom "Malformed results params: " . string(params)
     endif
@@ -146,16 +162,34 @@ endfunction
 " --- Handle job exit --------------------------------------------------------
 function! s:on_exit(channel, exit_status) abort
   " silent cleanup OK
-  unlet s:fz_job
-  unlet s:fz_channel
-  unlet g:search_match_id
+  if exists('s:fz_job')
+    unlet s:fz_job
+  endif
+  if exists('s:fz_channel')
+    unlet s:fz_channel
+  endif
+  if exists('s:search_root')
+    unlet s:search_root
+  endif
+  if exists('s:results_map')
+    unlet s:results_map
+  endif
+  if exists('g:search_match_id')
+    unlet g:search_match_id
+  endif
 endfunction
 
 " --- When user hits <Enter> in results buffer -------------------------------
 function! s:open_selected() abort
   let lnum = line('.')
-  let file = getline(lnum)
-  let file = substitute(file, '^' . escape(s:option_prefix, '\'), '', '')
+  let ltext = getline(lnum)
+  let display = substitute(ltext, '^' . escape(s:option_prefix, '\'), '', '')
+  " Prefer to look up the full path recorded for this displayed line.
+  if exists('s:results_map') && has_key(s:results_map, lnum)
+    let file = s:results_map[lnum + 1]
+  else
+    let file = display
+  endif
   " If the fuzzy backend is running, send the accept/submit input
   " so it can emit its finalResult and exit, then wait for it to finish.
   let l:status = job_status(s:fz_job)
