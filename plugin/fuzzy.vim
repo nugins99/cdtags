@@ -4,9 +4,15 @@ let s:fz_job = 0
 let s:results_buf = -1
 let s:option_prefix = '- '
 let s:results = 10
+let s:window_open = 0
 
 function! FuzzyFiles() abort
   " Create top mini input buffer
+  if s:window_open > 0
+    return
+  endif
+  let s:window_open = 1
+
   botright new
   resize 12
   let s:prompt_buf = bufnr('%')
@@ -18,6 +24,7 @@ function! FuzzyFiles() abort
   augroup FuzzyFiles
     au!
     autocmd TextChanged,TextChangedI <buffer> call s:send_query()
+    autocmd WinClosed <buffer> call s:close_window()
   augroup END
 
   " Start job
@@ -67,6 +74,11 @@ function! s:start_fz_job() abort
         \ 'exit_cb':'s:on_exit',
         \ })
   let s:fz_channel = job_getchannel(s:fz_job)
+endfunction
+
+function s:close_window()
+    let s:window_open = 0
+    # TODO - do I need to do more?
 endfunction
 
 " --- Highlight matched characters in results buffer -------------------------
@@ -209,6 +221,7 @@ function! s:open_selected() abort
 
   unlet g:search_match_id
   quit!
+  let s:window_open = 0
 
   if filereadable(file)
     execute 'edit' fnameescape(file)
