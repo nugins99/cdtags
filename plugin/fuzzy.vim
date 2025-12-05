@@ -25,6 +25,13 @@ function! FuzzyFiles() abort
   
   " Key to open the highlighted file
   nnoremap <buffer> <CR> :call <SID>open_selected()<CR>
+
+  " Remap <c-j> and <c-k> to go up or down in list
+  inoremap <silent> <buffer> <c-j> <esc>j
+  inoremap <silent> <buffer> <c-k> <esc>k
+  noremap <silent> <buffer> <c-j> j
+  noremap <silent> <buffer> <c-k> k
+
   " Start accepting input
   startinsert
 endfunction
