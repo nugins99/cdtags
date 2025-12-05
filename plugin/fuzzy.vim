@@ -77,8 +77,19 @@ function! s:start_fz_job() abort
 endfunction
 
 function s:close_window()
-    let s:window_open = 0
-    # TODO - do I need to do more?
+  " If the fuzzy backend is running, send the accept/submit input
+  " so it can emit its finalResult and exit, then wait for it to finish.
+  let l:status = job_status(s:fz_job)
+  if l:status ==# 'run'
+    if exists('s:fz_channel')
+      let payload = {'jsonrpc': '2.0', 'method': 'input', 'params': {'type': 'Newline'}}
+      call ch_sendraw(s:fz_channel, json_encode(payload) . "\n")
+    endif
+  endif
+
+  unlet g:search_match_id
+  quit!
+  let s:window_open = 0
 endfunction
 
 " --- Highlight matched characters in results buffer -------------------------
@@ -200,6 +211,8 @@ endfunction
 
 " --- When user hits <Enter> in results buffer -------------------------------
 function! s:open_selected() abort
+ " Grab the selected file by reading the current line
+ " and prepending the absolute path prefix
   let lnum = line('.')
   let ltext = getline(lnum)
   let display = substitute(ltext, '^' . escape(s:option_prefix, '\'), '', '')
@@ -209,20 +222,11 @@ function! s:open_selected() abort
   else
     let file = display
   endif
-  " If the fuzzy backend is running, send the accept/submit input
-  " so it can emit its finalResult and exit, then wait for it to finish.
-  let l:status = job_status(s:fz_job)
-  if l:status ==# 'run'
-    if exists('s:fz_channel')
-      let payload = {'jsonrpc': '2.0', 'method': 'input', 'params': {'type': 'Newline'}}
-      call ch_sendraw(s:fz_channel, json_encode(payload) . "\n")
-    endif
-  endif
 
-  unlet g:search_match_id
-  quit!
-  let s:window_open = 0
+  " Close current (search) window
+  call s:close_window() 
 
+  " Open file
   if filereadable(file)
     execute 'edit' fnameescape(file)
   else
